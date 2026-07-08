@@ -1,4 +1,4 @@
-import { useEditor, EditorContent } from '@tiptap/react'
+import { useEditor, EditorContent, Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import Link from '@tiptap/extension-link'
@@ -13,7 +13,7 @@ interface TiptapEditorProps {
   className?: string;
 }
 
-const MenuBar = ({ editor }: { editor: any }) => {
+const MenuBar = ({ editor }: { editor: Editor | null }) => {
   if (!editor) {
     return null
   }

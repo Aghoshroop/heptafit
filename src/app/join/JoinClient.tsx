@@ -49,11 +49,33 @@ export function JoinClient({ initialCode = "" }: { initialCode?: string }) {
         body: JSON.stringify({ code: codeToValidate }),
       });
 
-      const data = await res.json();
+      // Log response for debugging
+      console.log("[JOIN CLIENT] Response Status:", res.status);
+      const contentType = res.headers.get("content-type");
+      console.log("[JOIN CLIENT] Response Content-Type:", contentType);
 
       if (!res.ok) {
-        throw new Error(data.error || "Failed to validate invitation.");
+        // If it's an error, try to parse JSON if possible, otherwise read text
+        let errorMsg = "Failed to validate invitation.";
+        if (contentType && contentType.includes("application/json")) {
+          const errorData = await res.json();
+          errorMsg = errorData.error || errorMsg;
+        } else {
+          const text = await res.text();
+          console.error("[JOIN CLIENT] Received non-JSON error response:", text);
+          errorMsg = `Server error (${res.status}). Please try again later.`;
+        }
+        throw new Error(errorMsg);
       }
+
+      // If ok, it must be JSON
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await res.text();
+        console.error("[JOIN CLIENT] Expected JSON but received:", text);
+        throw new Error("Invalid server response format.");
+      }
+
+      const data = await res.json();
 
       setInviteDetails(data);
       setStep("details");
