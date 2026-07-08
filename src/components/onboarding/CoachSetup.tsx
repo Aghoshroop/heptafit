@@ -52,17 +52,20 @@ export function CoachSetup({ orgData, onNext }: CoachSetupProps) {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
 
-      // 2. Create User Document FIRST so that firestore.rules (isHeadCoach) passes
+      // 2. Generate Organization ID first
+      const orgRef = doc(collection(db, "organizations"));
+      const orgId = orgRef.id;
+
+      // 3. Create User Document FIRST so that firestore.rules (isHeadCoach) passes
       await setDoc(doc(db, "users", user.uid), {
         email: data.email,
         role: "coach", // legacy
         accountType: "head_coach",
+        organizationId: orgId, // Always keep organizationId in the root user doc
         createdAt: serverTimestamp(),
       });
 
-      // 3. Create Organization Document (now that user is a head_coach)
-      const orgRef = doc(collection(db, "organizations"));
-      const orgId = orgRef.id;
+      // 4. Create Organization Document (now that user is a head_coach)
       await setDoc(orgRef, {
         name: orgData.orgName,
         sport: orgData.sport,

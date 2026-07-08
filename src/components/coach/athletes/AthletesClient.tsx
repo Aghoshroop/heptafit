@@ -85,6 +85,19 @@ export function AthletesClient() {
     e.preventDefault();
     if (!user || !userData) return;
     
+    // Strict Validation
+    if (!userData.organizationId) {
+      console.error("Missing organizationId on user profile:", userData);
+      alert("Missing organization context. Please complete your profile setup or contact support.");
+      return;
+    }
+
+    if (!user.uid) {
+      console.error("Missing coachId on authenticated user:", user);
+      alert("Authentication error. Please log out and log back in.");
+      return;
+    }
+    
     // Generate a secure random code
     const array = new Uint32Array(2);
     crypto.getRandomValues(array);
@@ -93,7 +106,7 @@ export function AthletesClient() {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiration
     
-    await addDoc(collection(db, "coachInvitations"), {
+    const payload = {
       invitationCode: code,
       coachId: user.uid,
       organizationId: userData.organizationId,
@@ -102,10 +115,21 @@ export function AthletesClient() {
       targetName: inviteName,
       createdAt: serverTimestamp(),
       expiresAt: expiresAt.toISOString(),
-    });
-    
-    setGeneratedCode(code);
-    setInviteName("");
+    };
+
+    console.log("Current UID:", user.uid);
+    console.log("Current Coach Profile:", userData);
+    console.log("organizationId:", userData.organizationId);
+    console.log("Invitation payload:", payload);
+
+    try {
+      await addDoc(collection(db, "coachInvitations"), payload);
+      setGeneratedCode(code);
+      setInviteName("");
+    } catch (error) {
+      console.error("Error creating invitation:", error);
+      alert("Failed to generate invitation. Please try again.");
+    }
   };
 
   const copyToClipboard = () => {
