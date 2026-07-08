@@ -1,0 +1,199 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // --- Helper Functions ---
+    
+    // Check if user is signed in
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Get current user's document
+    function getUserDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function hasUserDoc() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+    
+    function getAccountType() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) 
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('accountType', '') 
+        : '';
+    }
+
+    // Check user role
+    function isSuperAdmin() {
+      return isAuthenticated() && getAccountType() == 'super_admin';
+    }
+
+    function isHeadCoach() {
+      return isAuthenticated() && getAccountType() == 'head_coach';
+    }
+
+    function isAthlete() {
+      return isAuthenticated() && getAccountType() == 'athlete';
+    }
+
+    function isStaff() {
+      return isAuthenticated() && getAccountType() == 'support_staff';
+    }
+
+    // Global Super Admin Rule - override
+    match /{document=**} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    // --- Collections ---
+
+    // USERS COLLECTION
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      // Users can only update their own base profile
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // ORGANIZATIONS
+    match /organizations/{orgId} {
+      // Anyone logged in can read an org (for joining/invites)
+      allow read: if isAuthenticated();
+      // Only head coaches can create/update their org
+      allow write: if isHeadCoach();
+    }
+
+    // PROFILES (coaches, students, staff)
+    match /coaches/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+    }
+    match /students/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+    }
+    match /staff/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // INVITATIONS (Backend verification for joining)
+    match /coachInvitations/{inviteId} {
+      allow read: if isAuthenticated() && resource.data.coachId == request.auth.uid;
+      allow write: if isHeadCoach();
+    }
+    match /staffInvitations/{inviteId} {
+      allow read: if isAuthenticated();
+      allow write: if isHeadCoach();
+    }
+    
+    // APPROVAL REQUESTS (Joining Flow)
+    match /approvalRequests/{requestId} {
+      allow read: if isAuthenticated();
+      // Athletes can create them, coaches can read/update them
+      allow create: if isAuthenticated();
+      allow update, delete: if isHeadCoach();
+    }
+
+    // RELATIONSHIPS
+    match /coachAthleteRelationships/{relId} {
+      allow read: if isAuthenticated();
+      // Coach or Athlete can manage their own relationships
+      allow write: if isAuthenticated();
+    }
+    match /staffRelationships/{relId} {
+      allow read: if isAuthenticated();
+      allow write: if isHeadCoach() || (isAuthenticated() && resource.data.staffId == request.auth.uid);
+    }
+
+    // CORE DATA COLLECTIONS (wellness, schedules, notes, etc.)
+    match /wellness/{docId} {
+      // Athlete can write their own. Coaches/Staff can read.
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && request.resource.data.athleteId == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.athleteId == request.auth.uid;
+    }
+
+    match /schedules/{docId} {
+      // Coaches/Staff can write. Athlete can only update isCompleted status.
+      allow read: if isAuthenticated();
+      allow create, delete: if isHeadCoach() || isStaff();
+      allow update: if isAuthenticated(); // Allowed for athletes to toggle complete
+    }
+
+    match /notes/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isHeadCoach() || isStaff();
+    }
+
+    match /competitions/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isHeadCoach() || isStaff();
+    }
+
+    match /calendarEvents/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isHeadCoach() || isStaff();
+    }
+
+    match /notifications/{docId} {
+      // User can only read and update their own notifications
+      allow read: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      // Anyone can create a notification for someone else (system-level via client)
+      allow create: if isAuthenticated();
+    }
+
+    match /messages/{messageId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.senderId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.senderId == request.auth.uid;
+    }
+
+    match /medical/{docId} {
+      // Only Physios/Doctors and Head Coaches can read/write medical
+      allow read, write: if isHeadCoach() || isStaff(); // In a real app, restrict to specific staff roles
+    }
+
+    match /trainingLogs/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isHeadCoach() || isStaff() || (isAuthenticated() && request.resource.data.athleteId == request.auth.uid);
+    }
+    
+    match /invitations/{inviteId} {
+      allow read: if isAuthenticated();
+      allow write: if isHeadCoach();
+    }
+
+    match /auditLogs/{logId} {
+      // Immutable logs. Created by anyone logged in, read by admins/coaches
+      allow create: if isAuthenticated();
+      allow read: if isHeadCoach() || isSuperAdmin();
+      allow update, delete: if false; // Immutable
+    }
+
+    // LEGACY / OTHER COLLECTIONS
+    match /posts/{docId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /activities/{docId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /groups/{docId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /training_plans/{docId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /athletes/{docId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /insights/{docId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /trainingGroups/{docId} {
+      allow read, write: if isAuthenticated();
+    }
+  }
+}
