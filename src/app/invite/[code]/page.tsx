@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-import { JoinClient } from "../join/JoinClient";
+import { JoinClient } from "../../join/JoinClient";
 
 export default function InvitePage({ params }: { params: { code: string } }) {
   // In Next.js App Router, params in Server Components might need to be awaited in future versions, 

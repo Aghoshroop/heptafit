@@ -76,9 +76,10 @@ export default function InjuriesPage() {
                       <div className="flex items-center gap-3">
                         <h3 className="text-xl font-bold">{insight.title || "Injury Report"}</h3>
                         <StatusChip 
-                          status={insight.severity >= 80 ? "Inactive" : insight.severity >= 50 ? "Pending" : "Active"} 
-                          label={insight.severity >= 80 ? "Severe" : insight.severity >= 50 ? "Moderate" : "Minor"} 
-                        />
+                          status={insight.severity >= 80 ? "danger" : insight.severity >= 50 ? "warning" : "info"} 
+                        >
+                          {insight.severity >= 80 ? "Severe" : insight.severity >= 50 ? "Moderate" : "Mild"}
+                        </StatusChip>
                       </div>
                       <p className="text-muted-foreground">{insight.description}</p>
                       <div className="text-sm text-muted-foreground pt-2">

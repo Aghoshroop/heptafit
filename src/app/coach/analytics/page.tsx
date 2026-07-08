@@ -21,7 +21,7 @@ export default function AnalyticsPage() {
     where("organizationId", "==", orgId)
   ]);
 
-  const { chartData } = useMemo(() => {
+  const chartData = useMemo(() => {
     // Generate dummy historical data to look good, but scale by actual athlete count
     const multiplier = athletes.length > 0 ? athletes.length : 1;
     return [

@@ -75,9 +75,10 @@ export default function CalendarPage() {
                           </div>
                         </div>
                         <StatusChip 
-                          status={event.type === "competition" ? "Active" : "Pending"} 
-                          label={event.type} 
-                        />
+                          status={event.type === "competition" ? "active" : "neutral"} 
+                        >
+                          {event.type}
+                        </StatusChip>
                       </div>
                       {event.description && (
                         <p className="text-muted-foreground text-sm">{event.description}</p>
@@ -102,7 +103,7 @@ export default function CalendarPage() {
                     <h4 className="font-semibold">{event.title}</h4>
                     <span className="text-xs text-muted-foreground">{format(new Date(event.start), "MMM dd, yyyy")}</span>
                   </div>
-                  <StatusChip status="Inactive" label="Completed" />
+                  <StatusChip status="neutral">Completed</StatusChip>
                 </CardContent>
               </Card>
             ))}

@@ -10,7 +10,7 @@ import { Shield, ArrowRight, Loader2, AlertCircle, CheckCircle2 } from "lucide-r
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function JoinClient({ initialCode = "" }: { initialCode?: string }) {
   const router = useRouter();

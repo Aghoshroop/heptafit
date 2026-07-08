@@ -19,7 +19,7 @@ export default function MessagesPage() {
     where("organizationId", "==", orgId)
   ]);
   
-  const athletes = users.filter((u: any) => u.accountType === "athlete");
+  const athletes: any[] = users.filter((u: any) => u.accountType === "athlete");
 
   if (!orgId) return null;
 

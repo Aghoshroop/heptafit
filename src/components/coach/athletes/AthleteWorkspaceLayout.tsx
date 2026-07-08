@@ -103,7 +103,9 @@ export function AthleteWorkspaceLayout({ children }: { children: React.ReactNode
               <div className="mb-2">
                 <div className="flex items-center gap-3 mb-1">
                   <h1 className="text-3xl font-black">{athlete.firstName} {athlete.lastName}</h1>
-                  <StatusChip status={athlete.status} />
+                  <StatusChip status={athlete.status === "Active" ? "active" : athlete.status === "Injured" ? "danger" : "neutral"}>
+                    {athlete.status}
+                  </StatusChip>
                 </div>
                 <p className="text-muted-foreground font-medium">{athlete.sport || "General Athletics"} • Joined 2026</p>
               </div>

@@ -1,7 +1,9 @@
-import * as admin from 'firebase-admin';
+import { getApps, initializeApp, cert } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 
 // Protect against multiple initializations in development
-if (!admin.apps.length) {
+if (!getApps().length) {
   try {
     const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
     
@@ -9,18 +11,18 @@ if (!admin.apps.length) {
       // Parse the JSON string
       const serviceAccount = JSON.parse(serviceAccountKey);
       
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount)
+      initializeApp({
+        credential: cert(serviceAccount)
       });
     } else {
       console.warn("⚠️ FIREBASE_SERVICE_ACCOUNT_KEY is missing in environment variables.");
       // Fallback for default initialization if deployed in GCP (e.g. Cloud Run, Vercel with specific setups)
-      admin.initializeApp();
+      initializeApp();
     }
   } catch (error) {
     console.error('Firebase admin initialization error', error);
   }
 }
 
-export const adminDb = admin.firestore();
-export const adminAuth = admin.auth();
+export const adminDb = getFirestore();
+export const adminAuth = getAuth();

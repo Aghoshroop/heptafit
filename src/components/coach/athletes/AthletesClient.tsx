@@ -230,7 +230,9 @@ export function AthletesClient() {
                             {athlete.firstName?.[0] || 'A'}{athlete.lastName?.[0]}
                           </div>
                         </div>
-                        <StatusChip status={athlete.status} />
+                        <StatusChip status={athlete.status === "Active" ? "active" : athlete.status === "Injured" ? "danger" : "neutral"}>
+                          {athlete.status}
+                        </StatusChip>
                       </div>
                       <h3 className="font-bold text-lg mb-1 group-hover:text-blue-400 transition-colors">{athlete.firstName} {athlete.lastName}</h3>
                       <p className="text-xs text-muted-foreground mb-4">Active: {athlete.lastActive}</p>
@@ -283,7 +285,9 @@ export function AthletesClient() {
                           </Link>
                         </td>
                         <td className="px-6 py-4">
-                          <StatusChip status={athlete.status} />
+                          <StatusChip status={athlete.status === "Active" ? "active" : athlete.status === "Injured" ? "danger" : "neutral"}>
+                            {athlete.status}
+                          </StatusChip>
                         </td>
                         <td className="px-6 py-4">
                           <span className={`font-black ${athlete.readiness >= 80 ? 'text-emerald-500' : athlete.readiness >= 70 ? 'text-blue-500' : 'text-amber-500'}`}>

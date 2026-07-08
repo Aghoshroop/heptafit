@@ -64,7 +64,7 @@ export default function TrainingPage() {
                 <CardTitle className="text-xl">Indoor Season 2026-27</CardTitle>
                 <CardDescription className="mt-1">Specific Preparatory Phase (SPP) focusing on max velocity and power.</CardDescription>
               </div>
-              <StatusChip status="Active" label="In Progress" />
+              <StatusChip status="active">In Progress</StatusChip>
             </div>
           </CardHeader>
           <CardContent>
@@ -100,7 +100,7 @@ export default function TrainingPage() {
                 <CardTitle className="text-xl">Base Phase 2026</CardTitle>
                 <CardDescription className="mt-1">General physical preparedness and aerobic base building.</CardDescription>
               </div>
-              <StatusChip status="Inactive" label="Completed" />
+              <StatusChip status="neutral">Completed</StatusChip>
             </div>
           </CardHeader>
           <CardContent>

@@ -45,7 +45,7 @@ export default function SessionsPage() {
                 <CardTitle className="text-xl">Max V Sprint Block</CardTitle>
                 <CardDescription className="mt-1">High intensity speed development.</CardDescription>
               </div>
-              <StatusChip status="Active" label="Track" />
+              <StatusChip status="active">Track</StatusChip>
             </div>
           </CardHeader>
           <CardContent className="flex-1 flex flex-col justify-end">
@@ -73,7 +73,7 @@ export default function SessionsPage() {
                 <CardTitle className="text-xl">Heavy Lower Body</CardTitle>
                 <CardDescription className="mt-1">Squat focus with plyo contrast.</CardDescription>
               </div>
-              <StatusChip status="Pending" label="Strength" />
+              <StatusChip status="warning">Strength</StatusChip>
             </div>
           </CardHeader>
           <CardContent className="flex-1 flex flex-col justify-end">
