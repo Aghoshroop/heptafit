@@ -5,16 +5,18 @@ export async function POST(req: Request) {
   try {
     const { code, userId } = await req.json();
 
-    if (!code || typeof code !== "string" || !userId) {
+    if (!code || typeof code !== "string" || !code.trim() || !userId) {
       return NextResponse.json({ error: "Invalid request parameters." }, { status: 400 });
     }
 
-    const upperCode = code.toUpperCase();
+    const upperCode = code.trim().toUpperCase();
+    console.log("[INVITE ACCEPT] Processing acceptance for code:", upperCode, "by user:", userId);
+
     const invitesRef = adminDb.collection("coachInvitations");
     const snapshot = await invitesRef.where("invitationCode", "==", upperCode).get();
 
     if (snapshot.empty) {
-      return NextResponse.json({ error: "Invalid invitation code." }, { status: 404 });
+      return NextResponse.json({ error: "Invitation not found. Please check the code and try again." }, { status: 404 });
     }
 
     const inviteDoc = snapshot.docs[0];

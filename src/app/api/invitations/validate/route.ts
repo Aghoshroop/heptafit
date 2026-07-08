@@ -5,34 +5,48 @@ export async function POST(req: Request) {
   try {
     const { code } = await req.json();
 
-    if (!code || typeof code !== "string") {
+    if (!code || typeof code !== "string" || !code.trim()) {
       return NextResponse.json({ error: "Invalid invitation code format." }, { status: 400 });
     }
 
-    const upperCode = code.toUpperCase();
+    const upperCode = code.trim().toUpperCase();
+    console.log("[INVITE VALIDATION] Received code:", code, "-> Normalized:", upperCode);
+
     const invitesRef = adminDb.collection("coachInvitations");
     const snapshot = await invitesRef.where("invitationCode", "==", upperCode).get();
+    
+    console.log(`[INVITE VALIDATION] Firestore query returned ${snapshot.size} matching documents.`);
 
     if (snapshot.empty) {
-      return NextResponse.json({ error: "Invalid invitation code." }, { status: 404 });
+      return NextResponse.json({ error: "Invitation not found. Please check the code and try again." }, { status: 404 });
     }
 
     const inviteDoc = snapshot.docs[0];
     const inviteData = inviteDoc.data();
+    console.log("[INVITE VALIDATION] Invitation Document:", { id: inviteDoc.id, ...inviteData });
+
+    // Validate essential properties exist
+    if (!inviteData.organizationId || !inviteData.coachId || !inviteData.role) {
+      console.error("[INVITE VALIDATION] Invitation is missing required fields (organizationId, coachId, role):", inviteData);
+      return NextResponse.json({ error: "Invitation is corrupted. Please contact the coach to issue a new one." }, { status: 500 });
+    }
 
     // Check expiration
     if (inviteData.expiresAt && new Date(inviteData.expiresAt) < new Date()) {
       await inviteDoc.ref.update({ status: "expired" });
-      return NextResponse.json({ error: "This invitation has expired." }, { status: 410 });
+      console.log(`[INVITE VALIDATION] Invitation ${upperCode} expired at ${inviteData.expiresAt}`);
+      return NextResponse.json({ error: "This invitation has expired. Please request a new one." }, { status: 410 });
     }
 
     // Check status
     if (["accepted", "registered", "active"].includes(inviteData.status)) {
+      console.log(`[INVITE VALIDATION] Invitation ${upperCode} already used. Status: ${inviteData.status}`);
       return NextResponse.json({ error: "This invitation has already been used." }, { status: 409 });
     }
 
     if (["revoked", "cancelled", "rejected"].includes(inviteData.status)) {
-      return NextResponse.json({ error: "This invitation is no longer valid." }, { status: 403 });
+      console.log(`[INVITE VALIDATION] Invitation ${upperCode} revoked. Status: ${inviteData.status}`);
+      return NextResponse.json({ error: "This invitation has been revoked and is no longer valid." }, { status: 403 });
     }
 
     // If pending, mark as opened

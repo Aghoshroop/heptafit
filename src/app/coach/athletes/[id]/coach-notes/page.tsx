@@ -10,12 +10,8 @@ import { Input } from "@/components/ui/Input";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Trash2, Pin, Tag, Clock, Send, ShieldAlert, Activity, Users, Image as ImageIcon, Search, Filter, Archive } from "lucide-react";
 import { toast } from "sonner";
-import dynamic from "next/dynamic";
-import "react-quill/dist/quill.snow.css";
+import { TiptapEditor } from "@/components/ui/TiptapEditor";
 import { logActivity } from "@/lib/activityService";
-
-// Dynamically import Quill to avoid SSR issues
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
 const CATEGORIES = [
   { id: "tactical", label: "Tactical", icon: Users, color: "text-blue-500", bg: "bg-blue-500/10 border-blue-500/20" },
@@ -208,20 +204,11 @@ export default function CoachNotesPage() {
         </div>
         <CardContent className="p-0">
           <div className="bg-background/80 relative">
-            <ReactQuill 
-              theme="snow" 
-              value={content} 
+            <TiptapEditor
+              value={content}
               onChange={setContent}
-              className="text-white border-none h-40 mb-12 [&_.ql-editor]:text-sm"
+              className="h-40 mb-12 border-none bg-transparent"
               placeholder="Write a detailed assessment..."
-              modules={{
-                toolbar: [
-                  [{ 'header': [1, 2, 3, false] }],
-                  ['bold', 'italic', 'underline', 'strike'],
-                  [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                  ['link', 'clean']
-                ],
-              }}
             />
           </div>
           
