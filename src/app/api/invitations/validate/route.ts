@@ -85,6 +85,13 @@ export async function POST(req: Request) {
 
   } catch (error: any) {
     console.error("Error validating invitation:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { 
+        success: false,
+        error: error.message || "Internal server error",
+        stack: process.env.NODE_ENV === "development" ? error.stack : undefined 
+      }, 
+      { status: 500 }
+    );
   }
 }

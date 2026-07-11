@@ -1,47 +1,63 @@
-import { getApps, initializeApp, cert, App } from 'firebase-admin/app';
-import { getFirestore, Firestore } from 'firebase-admin/firestore';
-import { getAuth, Auth } from 'firebase-admin/auth';
+import { App, cert, getApps, initializeApp } from "firebase-admin/app";
+import { getAuth, Auth } from "firebase-admin/auth";
+import { Firestore, getFirestore } from "firebase-admin/firestore";
 
-let app: App | undefined;
+let app: App;
 
-function getFirebaseAdminApp() {
+function getFirebaseAdminApp(): App {
   if (app) return app;
-  if (getApps().length) {
+
+  if (getApps().length > 0) {
     app = getApps()[0];
     return app;
   }
-  
-  const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-  if (serviceAccountKey) {
-    try {
-      const serviceAccount = JSON.parse(serviceAccountKey);
-      app = initializeApp({ credential: cert(serviceAccount) });
-    } catch (e) {
-      console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY JSON", e);
-      app = initializeApp(); // Fallback
-    }
-  } else {
-    console.warn("⚠️ FIREBASE_SERVICE_ACCOUNT_KEY is missing in environment variables.");
-    app = initializeApp();
+
+  const projectId = process.env.FIREBASE_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+
+  if (!projectId) {
+    throw new Error("❌ FIREBASE_PROJECT_ID is missing from .env.local");
   }
-  
+
+  if (!clientEmail) {
+    throw new Error("❌ FIREBASE_CLIENT_EMAIL is missing from .env.local");
+  }
+
+  if (!privateKey) {
+    throw new Error("❌ FIREBASE_PRIVATE_KEY is missing from .env.local");
+  }
+
+  console.log("🔥 Initializing Firebase Admin...");
+  console.log("Project:", projectId);
+  console.log("Client Email:", clientEmail);
+  console.log("Private Key Loaded:", !!privateKey);
+
+  app = initializeApp({
+    credential: cert({
+      projectId,
+      clientEmail,
+      privateKey: privateKey.replace(/\\n/g, "\n"),
+    }),
+  });
+
+  console.log("✅ Firebase Admin initialized successfully.");
+
   return app;
 }
 
 export const adminDb = new Proxy({} as Firestore, {
-  get(target, prop: string | symbol) {
+  get(_, prop) {
     const db = getFirestore(getFirebaseAdminApp());
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const val = (db as any)[prop];
-    return typeof val === 'function' ? val.bind(db) : val;
-  }
+    const value = (db as any)[prop];
+    return typeof value === "function" ? value.bind(db) : value;
+  },
 });
 
 export const adminAuth = new Proxy({} as Auth, {
-  get(target, prop: string | symbol) {
+  get(_, prop) {
     const auth = getAuth(getFirebaseAdminApp());
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const val = (auth as any)[prop];
-    return typeof val === 'function' ? val.bind(auth) : val;
-  }
+    const value = (auth as any)[prop];
+    return typeof value === "function" ? value.bind(auth) : value;
+  },
 });
