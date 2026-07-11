@@ -94,6 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             setUserData({
               ...baseData,
+              uid: currentUser.uid,
               profile: profileData,
               firstName: profileData?.firstName || (baseData as any).firstName,
               lastName: profileData?.lastName || (baseData as any).lastName,

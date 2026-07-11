@@ -14,7 +14,7 @@ interface AddAthleteDialogProps {
 }
 
 export function AddAthleteDialog({ isOpen, onClose }: AddAthleteDialogProps) {
-  const { userData } = useAuth();
+  const { user, userData } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -26,7 +26,7 @@ export function AddAthleteDialog({ isOpen, onClose }: AddAthleteDialogProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userData?.organizationId) return;
+    if (!userData?.organizationId || !user?.uid) return;
     
     setLoading(true);
     try {
@@ -37,7 +37,7 @@ export function AddAthleteDialog({ isOpen, onClose }: AddAthleteDialogProps) {
         accountType: "athlete",
         role: "student",
         organizationId: userData.organizationId,
-        headCoachId: userData.accountType === "head_coach" ? userData.uid : userData.organizationId,
+        headCoachId: userData.accountType === "head_coach" ? user.uid : userData.organizationId,
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
@@ -49,7 +49,7 @@ export function AddAthleteDialog({ isOpen, onClose }: AddAthleteDialogProps) {
       
       const relRef = doc(collection(db, "coachAthleteRelationships"));
       batch.set(relRef, {
-        coachId: userData.uid,
+        coachId: user.uid,
         studentId: userRef.id,
         status: "active",
         createdAt: serverTimestamp()

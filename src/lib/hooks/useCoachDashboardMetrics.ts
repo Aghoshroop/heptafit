@@ -12,17 +12,22 @@ export function useCoachData() {
   
   const isReady = !!orgId && !!coachId;
 
+  const isHeadCoach = userData?.accountType === "head_coach";
+
   const { data: relationships, loading: relLoading } = useRealtimeData("coachAthleteRelationships", [
     where("coachId", "==", coachId)
   ], isReady);
   
   const { data: athletesRaw, loading: athletesLoading } = useRealtimeData("users", [
-    where("organizationId", "==", orgId),
-    where("role", "==", "student")
+    where("organizationId", "==", orgId)
   ], isReady);
 
   const athleteIds = useMemo(() => relationships.map((r: any) => r.studentId), [relationships]);
-  const athletes = useMemo(() => athletesRaw.filter((a: any) => athleteIds.includes(a.uid || a.id)), [athletesRaw, athleteIds]);
+  const athletes = useMemo(() => athletesRaw.filter((a: any) => {
+    if (a.accountType !== "athlete" && a.role !== "student") return false;
+    if (isHeadCoach) return true;
+    return athleteIds.includes(a.uid || a.id) || a.headCoachId === coachId;
+  }), [athletesRaw, athleteIds, isHeadCoach, coachId]);
 
   const { data: insights, loading: insightsLoading } = useRealtimeData("insights", [
     where("organizationId", "==", orgId)
