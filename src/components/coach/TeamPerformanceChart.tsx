@@ -105,7 +105,7 @@ export function TeamPerformanceChart() {
                 <Tooltip 
                   contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: "8px", fontSize: "12px" }}
                   itemStyle={{ color: "#8b5cf6", fontWeight: "bold" }}
-                  formatter={(value: number) => [`${value} mins`, 'Volume']}
+                  formatter={(value: any) => [`${value} mins`, 'Volume']}
                 />
                 <Area type="monotone" dataKey="pts" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorPts)" />
               </AreaChart>

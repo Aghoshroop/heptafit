@@ -133,10 +133,10 @@ export function useCoachAthletesWithMetrics() {
       
       // Calculate last active from schedules (latest completed)
       const athleteSchedules = schedules
-        .filter((s: any) => s.athleteId === uId && s.isCompleted)
+        .filter((s: any) => (s.athleteId === uId || s.athleteId === athlete.id) && s.isCompleted)
         .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
         
-      const lastActive = athleteSchedules.length > 0 ? athleteSchedules[0].date : "Never";
+      const lastActive = athleteSchedules.length > 0 ? (athleteSchedules[0] as any).date : "Never";
 
       return {
         ...athlete,

@@ -17,8 +17,8 @@ export default function WellnessPage() {
   const wellnessData = useMemo(() => {
     return athletes.map((athlete: any) => {
       // Find latest wellness log for this athlete
-      const athleteWellness = wellness
-        .filter((w: any) => w.athleteId === athlete.uid)
+      const athleteWellness: any = wellness
+        .filter((w: any) => w.athleteId === athlete.uid || w.athleteId === athlete.id)
         .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
       
       const sleep = athleteWellness?.sleep || "--";
