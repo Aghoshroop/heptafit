@@ -13,7 +13,7 @@ import { useAthleteWorkspaceMetrics } from "@/lib/hooks/useCoachDashboardMetrics
 
 const TABS = [
   { name: "Overview", path: "", icon: User },
-  { name: "Personal Info", path: "personal", icon: FileText },
+  { name: "Athlete Card", path: "personal", icon: FileText },
   { name: "Medical", path: "medical", icon: Heart },
   { name: "Body Metrics", path: "metrics", icon: Ruler },
   { name: "Daily Wellness", path: "wellness", icon: Coffee },
@@ -22,7 +22,6 @@ const TABS = [
   { name: "Competitions", path: "competitions", icon: Trophy },
   { name: "Attendance", path: "attendance", icon: CalendarDays },
   { name: "Coach Notes", path: "coach-notes", icon: ClipboardList },
-  { name: "Nutrition", path: "nutrition", icon: FileText },
   { name: "Injuries", path: "injuries", icon: ShieldAlert },
   { name: "Documents", path: "documents", icon: FileText },
   { name: "Videos", path: "videos", icon: Video },
@@ -91,8 +90,8 @@ export function AthleteWorkspaceLayout({ children }: { children: React.ReactNode
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 -mt-12">
             <div className="flex items-end gap-6">
               <div className="w-24 h-24 rounded-2xl bg-card border-4 border-background shadow-2xl flex items-center justify-center relative z-10 overflow-hidden">
-                {athlete.photoURL ? (
-                  <img src={athlete.photoURL} alt="Athlete" className="w-full h-full object-cover" />
+                {athlete.photoURL || athlete.profilePhotoUrl ? (
+                  <img src={athlete.photoURL || athlete.profilePhotoUrl} alt="Athlete" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white text-3xl font-black">
                     {athlete.firstName?.[0] || 'A'}{athlete.lastName?.[0]}
@@ -107,20 +106,40 @@ export function AthleteWorkspaceLayout({ children }: { children: React.ReactNode
                     {status}
                   </StatusChip>
                 </div>
-                <p className="text-muted-foreground font-medium">{athlete.sport || "General Athletics"} • Joined 2026</p>
+                <p className="text-muted-foreground text-sm font-medium">
+                  {athlete.sport || "General Athletics"} {athlete.competitionCategory ? `• ${athlete.competitionCategory}` : ""}
+                  <span className="mx-2 opacity-50">|</span>
+                  ID: <span className="font-mono">{athlete.athleteNumber || "No ID"}</span>
+                </p>
               </div>
             </div>
 
-            <div className="flex gap-3 mb-2">
-              <div className="bg-background/50 border border-white/5 rounded-xl p-3 text-center min-w-[100px]">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-1">Readiness</p>
-                <p className={`text-xl font-black ${readiness && readiness >= 80 ? 'text-emerald-500' : readiness && readiness >= 70 ? 'text-blue-500' : readiness ? 'text-amber-500' : 'text-muted-foreground'}`}>
+            <div className="flex flex-wrap gap-2 mb-2 justify-start md:justify-end">
+              <div className="bg-background/50 border border-white/5 rounded-xl p-2.5 text-center min-w-[90px]">
+                <p className="text-[9px] text-muted-foreground uppercase tracking-wider font-bold mb-0.5">Readiness</p>
+                <p className={`text-sm font-black ${readiness && readiness >= 80 ? 'text-emerald-500' : readiness && readiness >= 70 ? 'text-blue-500' : readiness ? 'text-amber-500' : 'text-muted-foreground'}`}>
                   {readiness !== null ? `${readiness}%` : '--'}
                 </p>
               </div>
-              <div className="bg-background/50 border border-white/5 rounded-xl p-3 text-center min-w-[100px]">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-1">Training Load</p>
-                <p className="text-xl font-black">High</p>
+              <div className="bg-background/50 border border-white/5 rounded-xl p-2.5 text-center min-w-[90px]">
+                <p className="text-[9px] text-muted-foreground uppercase tracking-wider font-bold mb-0.5">Attendance</p>
+                <p className="text-sm font-bold text-muted-foreground text-[11px] leading-tight mt-1">No Attendance<br/>Data</p>
+              </div>
+              <div className="bg-background/50 border border-white/5 rounded-xl p-2.5 text-center min-w-[90px]">
+                <p className="text-[9px] text-muted-foreground uppercase tracking-wider font-bold mb-0.5">Phase</p>
+                <p className="text-sm font-black text-blue-400">{athlete.competitionPhase || "--"}</p>
+              </div>
+              <div className="bg-background/50 border border-white/5 rounded-xl p-2.5 text-center min-w-[90px]">
+                <p className="text-[9px] text-muted-foreground uppercase tracking-wider font-bold mb-0.5">Current Plan</p>
+                <p className="text-sm font-bold text-muted-foreground text-[11px] leading-tight mt-1">No Active<br/>Plan</p>
+              </div>
+              <div className="bg-background/50 border border-white/5 rounded-xl p-2.5 text-center min-w-[90px]">
+                <p className="text-[9px] text-muted-foreground uppercase tracking-wider font-bold mb-0.5">Next Session</p>
+                <p className="text-sm font-bold text-muted-foreground text-[11px] leading-tight mt-1">No Upcoming<br/>Session</p>
+              </div>
+              <div className="bg-background/50 border border-white/5 rounded-xl p-2.5 text-center min-w-[90px]">
+                <p className="text-[9px] text-muted-foreground uppercase tracking-wider font-bold mb-0.5">Active Injury</p>
+                <p className="text-sm font-bold text-muted-foreground text-[11px] leading-tight mt-1">No Injury<br/>Reported</p>
               </div>
             </div>
           </div>

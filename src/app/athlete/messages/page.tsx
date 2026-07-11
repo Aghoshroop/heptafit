@@ -21,7 +21,7 @@ export default function AthleteMessagesPage() {
 
   const { data: users, loading } = useRealtimeData("users", [
     where("organizationId", "==", orgId)
-  ]);
+  ], !!orgId);
   
   // Athlete can message coaches
   const coaches: any[] = users.filter((u: any) => u.accountType === "head_coach" || u.accountType === "assistant_coach");

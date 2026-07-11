@@ -5,33 +5,8 @@ import { useParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { collection, query, onSnapshot, addDoc, serverTimestamp, deleteDoc, doc, orderBy, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Card, CardContent } from "@/components/ui/Card";
-import { Trash2, Heart, Moon, Brain, Activity, Droplet, Battery, Zap, AlertCircle } from "lucide-react";
-import { toast } from "sonner";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { addWellnessLog } from "@/lib/services/wellness.service";
 import { WellnessLog } from "@/lib/types";
-
-const wellnessSchema = z.object({
-  logType: z.enum(["Morning", "Evening", "Post-Training"]),
-  sleepHours: z.string().min(1, "Required"),
-  sleepQuality: z.string().min(1, "Required"),
-  mood: z.string().min(1, "Required"),
-  stress: z.string().min(1, "Required"),
-  fatigue: z.string().min(1, "Required"),
-  muscleSoreness: z.string().min(1, "Required"),
-  hydration: z.string().min(1, "Required"),
-  motivation: z.string().min(1, "Required"),
-  restingHR: z.string().optional(),
-  hrv: z.string().optional(),
-});
-
-type WellnessFormValues = z.infer<typeof wellnessSchema>;
 
 
 
@@ -42,17 +17,6 @@ export default function WellnessPage() {
   
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-
-  const form = useForm<WellnessFormValues>({
-    resolver: zodResolver(wellnessSchema),
-    defaultValues: {
-      logType: "Morning",
-      sleepHours: "8", sleepQuality: "8", mood: "8", stress: "2",
-      fatigue: "2", muscleSoreness: "2", hydration: "8", motivation: "8",
-      restingHR: "", hrv: "",
-    }
-  });
 
   useEffect(() => {
     if (!athleteId) return;
@@ -81,50 +45,7 @@ export default function WellnessPage() {
     return () => unsubscribe();
   }, [athleteId]);
 
-  const onSubmit = async (data: WellnessFormValues) => {
-    setSaving(true);
-    try {
-      if (!userData?.organizationId || !userData?.uid) {
-        throw new Error("Missing user context");
-      }
 
-      const payload: Partial<WellnessLog> = {
-        date: new Date() as any, // Server timestamp will replace
-        type: data.logType,
-        sleepHours: parseFloat(data.sleepHours),
-        sleepQuality: parseInt(data.sleepQuality),
-        stressLevel: parseInt(data.stress),
-        fatigue: parseInt(data.fatigue),
-        muscleSoreness: parseInt(data.muscleSoreness),
-        hydration: parseInt(data.hydration),
-        nutrition: parseInt(data.mood), // mood used for nutrition in UI currently, let's keep it mapped or rename
-      };
-
-      const headCoachId = userData.accountType === "head_coach" ? userData.uid : userData.organizationId;
-
-      await addWellnessLog(
-        athleteId,
-        userData.organizationId,
-        headCoachId,
-        payload,
-        userData.uid,
-        `${userData.firstName} ${userData.lastName}`
-      );
-      
-      form.reset();
-      toast.success("Wellness logged successfully");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to log wellness");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this log?")) {
-      await deleteDoc(doc(db, "wellnessLogs", id));
-    }
-  };
 
   // Calculate compliance over last 7 days
   const calculateCompliance = () => {
@@ -273,77 +194,7 @@ export default function WellnessPage() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Input Form */}
-        <Card glass className="border-white/5 xl:col-span-1 h-fit">
-          <div className="bg-white/5 px-6 py-4 border-b border-white/5">
-            <h3 className="font-bold text-sm">Log Wellness</h3>
-          </div>
-          <CardContent className="p-5">
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase">Log Type</label>
-                <select {...form.register("logType")} className="w-full h-8 rounded-md border bg-background/50 px-2 text-xs border-white/10 font-bold focus:ring-1">
-                  <option value="Morning">Morning Wellness</option>
-                  <option value="Evening">Evening Wellness</option>
-                  <option value="Post-Training">Post-Training Recovery</option>
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-white/5">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-muted-foreground flex items-center gap-1"><Moon size={10}/> Sleep (hrs)</label>
-                  <Input type="number" step="0.5" {...form.register("sleepHours")} className="bg-background/50 border-white/10 h-8 text-sm" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-muted-foreground flex items-center gap-1"><Moon size={10}/> Quality (1-10)</label>
-                  <Input type="number" min="1" max="10" {...form.register("sleepQuality")} className="bg-background/50 border-white/10 h-8 text-sm" />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-muted-foreground flex items-center gap-1"><Brain size={10}/> Mood (1-10)</label>
-                  <Input type="number" min="1" max="10" {...form.register("mood")} className="bg-background/50 border-white/10 h-8 text-sm" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-muted-foreground flex items-center gap-1"><Brain size={10}/> Stress (1-10)</label>
-                  <Input type="number" min="1" max="10" {...form.register("stress")} className="bg-background/50 border-white/10 h-8 text-sm" />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-muted-foreground flex items-center gap-1"><Battery size={10}/> Fatigue (1-10)</label>
-                  <Input type="number" min="1" max="10" {...form.register("fatigue")} className="bg-background/50 border-white/10 h-8 text-sm" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-muted-foreground flex items-center gap-1"><Activity size={10}/> Soreness (1-10)</label>
-                  <Input type="number" min="1" max="10" {...form.register("muscleSoreness")} className="bg-background/50 border-white/10 h-8 text-sm" />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-muted-foreground flex items-center gap-1"><Droplet size={10}/> Hydration (1-10)</label>
-                  <Input type="number" min="1" max="10" {...form.register("hydration")} className="bg-background/50 border-white/10 h-8 text-sm" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-muted-foreground flex items-center gap-1"><Zap size={10}/> Motivation (1-10)</label>
-                  <Input type="number" min="1" max="10" {...form.register("motivation")} className="bg-background/50 border-white/10 h-8 text-sm" />
-                </div>
-              </div>
-              
-              <Button type="submit" disabled={saving} className="w-full bg-blue-500 hover:bg-blue-600 text-white mt-2">
-                {saving ? "Saving..." : "Log Wellness"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        {/* History List */}
-        <div className="xl:col-span-2 space-y-4">
+      <div className="grid grid-cols-1 gap-6">
           <h3 className="font-bold text-sm">Recent Logs</h3>
           <div className="space-y-3">
             {[...items].reverse().map(item => (
@@ -389,14 +240,6 @@ export default function WellnessPage() {
                     </div>
                   </div>
 
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => handleDelete(item.id)}
-                    className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all ml-auto md:ml-2 h-8 w-8"
-                  >
-                    <Trash2 size={14} />
-                  </Button>
                 </CardContent>
               </Card>
             ))}

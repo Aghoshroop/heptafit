@@ -14,7 +14,6 @@ export default function MedicalPage() {
   
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [newItem, setNewItem] = useState("");
 
   useEffect(() => {
     if (!athleteId) return;
@@ -33,75 +32,69 @@ export default function MedicalPage() {
     return () => unsubscribe();
   }, [athleteId]);
 
-  const handleAdd = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newItem.trim()) return;
-    
-    await addDoc(collection(db, "users", athleteId, "medical"), {
-      title: newItem,
-      createdAt: serverTimestamp(),
-      addedBy: "coach"
-    });
-    
-    setNewItem("");
-  };
 
-  const handleDelete = async (id: string) => {
-    await deleteDoc(doc(db, "users", athleteId, "medical", id));
-  };
 
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Medical</h2>
       
-      <form onSubmit={handleAdd} className="flex gap-2">
-        <Input 
-          placeholder="Add a new entry for Medical..." 
-          value={newItem}
-          onChange={(e) => setNewItem(e.target.value)}
-          className="bg-background/50 border-white/10"
-        />
-        <Button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white">Add</Button>
-      </form>
 
-      {loading ? (
-        <div className="animate-pulse flex space-x-4">
-          <div className="flex-1 space-y-4 py-1">
-            <div className="h-4 bg-white/10 rounded w-3/4"></div>
-            <div className="space-y-2">
-              <div className="h-4 bg-white/10 rounded"></div>
-              <div className="h-4 bg-white/10 rounded w-5/6"></div>
-            </div>
-          </div>
+
+      {/* Current Alerts Section */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-4">
+          <h3 className="text-sm font-bold text-rose-500 uppercase tracking-wider mb-2">Current Restrictions</h3>
+          <p className="text-sm text-foreground/80 font-medium">None</p>
         </div>
-      ) : items.length === 0 ? (
-        <div className="bg-background/30 border border-white/5 rounded-xl p-8 text-center">
-          <p className="text-muted-foreground">No records found for Medical.</p>
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
+          <h3 className="text-sm font-bold text-amber-500 uppercase tracking-wider mb-2">Return-to-Play</h3>
+          <p className="text-sm text-foreground/80 font-medium">Cleared for all activities</p>
         </div>
-      ) : (
-        <div className="space-y-3">
-          {items.map(item => (
-            <div key={item.id} className="bg-background/50 border border-white/5 p-4 rounded-xl flex justify-between items-center group">
-              <div>
-                <p className="font-medium">{item.title}</p>
-                {item.createdAt && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {new Date(item.createdAt?.toDate?.() || Date.now()).toLocaleString()}
-                  </p>
-                )}
+        <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+          <h3 className="text-sm font-bold text-blue-400 uppercase tracking-wider mb-2">Medication Alerts</h3>
+          <p className="text-sm text-foreground/80 font-medium">No active medications</p>
+        </div>
+      </div>
+
+      {/* Medical History - Collapsed */}
+      <details className="group border border-white/10 rounded-2xl bg-black/20 overflow-hidden open:bg-black/40 transition-colors mt-6">
+        <summary className="px-6 py-4 flex items-center gap-2 cursor-pointer outline-none">
+          <h3 className="font-bold text-lg flex-1">Medical History</h3>
+          <div className="text-muted-foreground group-open:rotate-180 transition-transform">▼</div>
+        </summary>
+        <div className="px-6 pb-6 pt-2 border-t border-white/5">
+          {loading ? (
+            <div className="animate-pulse flex space-x-4">
+              <div className="flex-1 space-y-4 py-1">
+                <div className="h-4 bg-white/10 rounded w-3/4"></div>
+                <div className="space-y-2">
+                  <div className="h-4 bg-white/10 rounded"></div>
+                  <div className="h-4 bg-white/10 rounded w-5/6"></div>
+                </div>
               </div>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => handleDelete(item.id)}
-                className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
-              >
-                <Trash2 size={16} />
-              </Button>
             </div>
-          ))}
+          ) : items.length === 0 ? (
+            <div className="bg-background/30 border border-white/5 rounded-xl p-8 text-center">
+              <p className="text-muted-foreground">No historical records found.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {items.map(item => (
+                <div key={item.id} className="bg-background/50 border border-white/5 p-4 rounded-xl flex justify-between items-center">
+                  <div>
+                    <p className="font-medium">{item.title}</p>
+                    {item.createdAt && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {new Date(item.createdAt?.toDate?.() || Date.now()).toLocaleString()}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </details>
     </div>
   );
 }

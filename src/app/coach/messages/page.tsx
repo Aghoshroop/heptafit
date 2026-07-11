@@ -21,7 +21,7 @@ export default function MessagesPage() {
 
   const { data: users, loading } = useRealtimeData("users", [
     where("organizationId", "==", orgId)
-  ]);
+  ], !!orgId);
   
   const athletes: any[] = users.filter((u: any) => u.accountType === "athlete");
 
