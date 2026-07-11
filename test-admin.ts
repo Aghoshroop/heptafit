@@ -15,7 +15,7 @@ async function test() {
     }
     
     console.log("Initializing Firestore Admin query...");
-    const { adminDb } = await import('./src/lib/firebaseAdmin.ts');
+    const { adminDb } = await import('./src/lib/firebaseAdmin');
     const invitesRef = adminDb.collection("coachInvitations");
     const snapshot = await invitesRef.where("invitationCode", "==", "TESTING").get();
     console.log("Success! snapshot empty?", snapshot.empty);
