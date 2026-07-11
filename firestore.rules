@@ -54,6 +54,12 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       // Users can only update their own base profile
       allow write: if isAuthenticated() && request.auth.uid == userId;
+
+      // Allow access to all subcollections (attendance, wellness, metrics, etc.)
+      match /{document=**} {
+        allow read: if isAuthenticated();
+        allow write: if isHeadCoach() || isStaff() || (isAuthenticated() && request.auth.uid == userId);
+      }
     }
 
     // ORGANIZATIONS
@@ -159,6 +165,11 @@ service cloud.firestore {
     match /trainingLogs/{docId} {
       allow read: if isAuthenticated();
       allow write: if isHeadCoach() || isStaff() || (isAuthenticated() && request.resource.data.athleteId == request.auth.uid);
+    }
+    
+    match /attendance/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isHeadCoach() || isStaff() || isAuthenticated();
     }
     
     match /invitations/{inviteId} {
