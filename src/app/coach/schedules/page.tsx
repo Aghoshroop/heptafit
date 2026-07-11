@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import Papa from "papaparse";
 
 export default function CoachSchedulesPage() {
-  const { user } = useAuth();
+  const { user, userData } = useAuth();
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [athletes, setAthletes] = useState<any[]>([]);
@@ -34,9 +34,9 @@ export default function CoachSchedulesPage() {
   const [notes, setNotes] = useState("");
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !userData?.organizationId) return;
     
-    const q = query(collection(db, "schedules"));
+    const q = query(collection(db, "schedules"), where("organizationId", "==", userData.organizationId));
     const unsubscribeSchedules = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -48,13 +48,14 @@ export default function CoachSchedulesPage() {
     });
 
     const fetchAllUsers = async () => {
-      const usersSnap = await getDocs(collection(db, "athletes"));
-      setAthletes(usersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    }
+      const qUsers = query(collection(db, "users"), where("organizationId", "==", userData.organizationId), where("role", "==", "student"));
+      const snap = await getDocs(qUsers);
+      setAthletes(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    };
     fetchAllUsers();
 
     return () => unsubscribeSchedules();
-  }, [user]);
+  }, [user, userData?.organizationId]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -110,8 +111,8 @@ export default function CoachSchedulesPage() {
 
   const handleBuildPlan = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedAthleteId || !planDate || !planTitle) {
-      toast.error("Please fill required fields (Athlete, Date, Title)");
+    if (!selectedAthleteId || !planDate || !planTitle || !userData?.organizationId) {
+      toast.error("Please fill required fields and ensure you are in an organization.");
       return;
     }
 
@@ -119,6 +120,8 @@ export default function CoachSchedulesPage() {
     
     try {
       await addDoc(collection(db, "training_plans"), {
+        organizationId: userData.organizationId,
+        coachId: user?.uid,
         athleteId: selectedAthleteId,
         athleteName: `${athlete?.firstName} ${athlete?.lastName}`,
         title: planTitle,
@@ -136,6 +139,8 @@ export default function CoachSchedulesPage() {
 
       // Also add to schedules for calendar rendering
       await addDoc(collection(db, "schedules"), {
+        organizationId: userData.organizationId,
+        coachId: user?.uid,
         athleteId: selectedAthleteId,
         athleteName: `${athlete?.firstName} ${athlete?.lastName}`,
         title: planTitle,

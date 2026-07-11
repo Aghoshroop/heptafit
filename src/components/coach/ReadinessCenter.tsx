@@ -3,22 +3,10 @@
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
-import { useAuth } from "@/context/AuthContext";
-import { useRealtimeData } from "@/lib/hooks/useRealtimeData";
-import { where, orderBy } from "firebase/firestore";
+import { useCoachAthletesWithMetrics } from "@/lib/hooks/useCoachDashboardMetrics";
 
 export function ReadinessCenter() {
-  const { userData } = useAuth();
-  const orgId = userData?.organizationId || "";
-
-  const { data: athletes } = useRealtimeData("students", [
-    where("headCoachId", "==", userData?.uid || "")
-  ]);
-
-  const { data: insights } = useRealtimeData("insights", [
-    where("organizationId", "==", orgId),
-    where("status", "==", "active")
-  ]);
+  const { athletes, loading } = useCoachAthletesWithMetrics();
 
   const { data, totalAthletes } = useMemo(() => {
     let ready = 0;
@@ -27,20 +15,16 @@ export function ReadinessCenter() {
     let atRisk = 0;
 
     athletes.forEach((athlete: any) => {
-      // Find insights for this athlete
-      const athleteInsights = insights.filter((i: any) => i.athleteId === athlete.id);
+      const status = athlete.status; // "Active", "Recovery", "Injured", "Restricted"
+      const readiness = athlete.readiness; // 0-100 or null
       
-      const hasOvertraining = athleteInsights.some((i: any) => i.type === "Overtraining Risk");
-      const hasWellness = athleteInsights.some((i: any) => i.type === "Wellness");
-      const hasInjury = athleteInsights.some((i: any) => i.type === "Injury");
-
-      if (hasOvertraining || hasInjury) {
+      if (status === "Injured" || status === "Restricted") {
         atRisk++;
-      } else if (hasWellness) {
+      } else if (readiness !== null && readiness < 60) {
         fatigued++;
+      } else if (readiness !== null && readiness < 80) {
+        moderate++;
       } else {
-        // Distribute the rest between Ready and Moderate randomly if we don't have real wellness data
-        // For a more realistic look without actual daily logs for everyone, we assume most are ready
         ready++;
       }
     });
@@ -64,9 +48,8 @@ export function ReadinessCenter() {
         { name: "At Risk", value: atRisk, color: "#f43f5e" },
       ]
     };
-  }, [athletes, insights]);
+  }, [athletes]);
 
-  if (!orgId) return null;
 
   return (
     <Card glass hoverEffect>

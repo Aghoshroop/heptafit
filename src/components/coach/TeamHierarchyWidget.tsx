@@ -77,7 +77,7 @@ export function TeamHierarchyWidget() {
                     <p className="text-[10px] text-muted-foreground uppercase">{member.targetType}</p>
                   </div>
                 </div>
-                <StatusChip status="success">Active</StatusChip>
+                <StatusChip status={member.status === "active" ? "active" : "neutral"}>{member.status || "Unknown"}</StatusChip>
               </div>
             ))}
             {staff.length > 3 && (

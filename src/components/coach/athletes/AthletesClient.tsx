@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, deleteDoc, doc, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { useCoachAthletesWithMetrics } from "@/lib/hooks/useCoachDashboardMetrics";
 import { Search, UserPlus, Grid, List, MoreVertical, X, Copy, Check, Trash2, ChevronRight, Users, Link as LinkIcon, Download } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -18,8 +19,9 @@ export function AthletesClient() {
   const { user, userData } = useAuth();
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
   const [searchQuery, setSearchQuery] = useState("");
-  const [athletes, setAthletes] = useState<any[]>([]);
   const [invitations, setInvitations] = useState<any[]>([]);
+  
+  const { athletes, loading: athletesLoading } = useCoachAthletesWithMetrics();
   const [loading, setLoading] = useState(true);
   
   // Modal state
@@ -32,38 +34,7 @@ export function AthletesClient() {
   useEffect(() => {
     if (!user) return;
 
-    // Fetch active relationships
-    const relQuery = query(collection(db, "coachAthleteRelationships"), where("coachId", "==", user.uid));
-    const unsubscribeRel = onSnapshot(relQuery, async (snapshot) => {
-      const studentIds = snapshot.docs.map(doc => doc.data().studentId);
-      
-      if (studentIds.length === 0) {
-        setAthletes([]);
-        setLoading(false);
-        return;
-      }
-
-      // Fetch users
-      const usersQuery = query(collection(db, "users"), where("role", "==", "student"));
-      const unsubscribeUsers = onSnapshot(usersQuery, (userSnapshot) => {
-        const studentDocs = userSnapshot.docs
-          .map(d => ({ uid: d.id, ...d.data() }))
-          .filter(u => studentIds.includes(u.uid));
-        
-        // Mock readiness & last active for now as requested
-        const enriched = studentDocs.map(s => ({
-          ...s,
-          readiness: Math.floor(Math.random() * 40) + 60, // 60-100
-          status: Math.random() > 0.2 ? "Active" : (Math.random() > 0.5 ? "Injured" : "Resting"),
-          lastActive: "Today, 10:00 AM"
-        }));
-        
-        setAthletes(enriched);
-        setLoading(false);
-      });
-
-      return () => unsubscribeUsers();
-    });
+    setLoading(athletesLoading);
 
     // Fetch pending invitations
     const invQuery = query(
@@ -76,10 +47,9 @@ export function AthletesClient() {
     });
 
     return () => {
-      unsubscribeRel();
       unsubscribeInv();
     };
-  }, [user]);
+  }, [user, athletesLoading]);
 
   const generateInviteCode = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -265,8 +235,8 @@ export function AthletesClient() {
                         <div>
                           <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-1">Readiness</p>
                           <div className="flex items-center gap-2">
-                            <span className={`font-black ${athlete.readiness >= 80 ? 'text-emerald-500' : athlete.readiness >= 70 ? 'text-blue-500' : 'text-amber-500'}`}>
-                              {athlete.readiness}%
+                            <span className={`font-black ${athlete.readiness && athlete.readiness >= 80 ? 'text-emerald-500' : athlete.readiness && athlete.readiness >= 70 ? 'text-blue-500' : athlete.readiness ? 'text-amber-500' : 'text-muted-foreground'}`}>
+                              {athlete.readiness !== null ? `${athlete.readiness}%` : '--'}
                             </span>
                           </div>
                         </div>
@@ -314,8 +284,8 @@ export function AthletesClient() {
                           </StatusChip>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`font-black ${athlete.readiness >= 80 ? 'text-emerald-500' : athlete.readiness >= 70 ? 'text-blue-500' : 'text-amber-500'}`}>
-                            {athlete.readiness}%
+                          <span className={`font-black ${athlete.readiness && athlete.readiness >= 80 ? 'text-emerald-500' : athlete.readiness && athlete.readiness >= 70 ? 'text-blue-500' : athlete.readiness ? 'text-amber-500' : 'text-muted-foreground'}`}>
+                            {athlete.readiness !== null ? `${athlete.readiness}%` : '--'}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-muted-foreground">

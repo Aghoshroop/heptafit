@@ -3,8 +3,7 @@
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { useAuth } from "@/context/AuthContext";
-import { useRealtimeData } from "@/lib/hooks/useRealtimeData";
-import { where } from "firebase/firestore";
+import { useCoachData } from "@/lib/hooks/useCoachDashboardMetrics";
 import { Activity, Battery, Moon, Search, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -13,32 +12,40 @@ export default function WellnessPage() {
   const { userData } = useAuth();
   const orgId = userData?.organizationId || "";
 
-  const { data: users, loading } = useRealtimeData("users", [
-    where("organizationId", "==", orgId)
-  ]);
-  
-  const athletes = users.filter((u: any) => u.accountType === "athlete");
+  const { athletes, wellness, loading } = useCoachData();
 
-  // Mock wellness data for the athletes
   const wellnessData = useMemo(() => {
-    return athletes.map((athlete: any, index: number) => {
-      // Generate some deterministic looking random values
-      const seed = athlete.uid.charCodeAt(0) + index;
-      const sleep = 5 + (seed % 5) + (seed % 2 * 0.5); // 5 to 9.5
-      const hrv = 40 + (seed % 40); // 40 to 80
-      const stress = 1 + (seed % 5); // 1 to 5
-      const readiness = 100 - (stress * 5) - ((9 - sleep) * 5);
+    return athletes.map((athlete: any) => {
+      // Find latest wellness log for this athlete
+      const athleteWellness = wellness
+        .filter((w: any) => w.athleteId === athlete.uid)
+        .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+      
+      const sleep = athleteWellness?.sleep || "--";
+      const hrv = athleteWellness?.hrv || "--";
+      const stress = athleteWellness?.stress || "--";
+      const readiness = athleteWellness?.readiness !== undefined ? athleteWellness.readiness : null;
+      
+      let status = "low";
+      if (readiness !== null) {
+        if (readiness >= 80) status = 'optimal';
+        else if (readiness >= 60) status = 'moderate';
+      }
       
       return {
         athlete,
         sleep,
         hrv,
         stress,
-        readiness: Math.min(100, Math.max(0, readiness)),
-        status: readiness > 80 ? 'optimal' : readiness > 60 ? 'moderate' : 'low'
+        readiness,
+        status
       };
-    }).sort((a, b) => a.readiness - b.readiness); // Sort by lowest readiness first
-  }, [athletes]);
+    }).sort((a, b) => {
+      if (a.readiness === null) return 1;
+      if (b.readiness === null) return -1;
+      return a.readiness - b.readiness;
+    });
+  }, [athletes, wellness]);
 
   if (!orgId) return null;
 
@@ -92,18 +99,19 @@ export default function WellnessPage() {
                       <div className="w-full max-w-[100px] h-2 bg-black/40 rounded-full overflow-hidden">
                         <div 
                           className={`h-full rounded-full ${
+                            row.readiness === null ? 'bg-transparent' :
                             row.status === 'optimal' ? 'bg-emerald-500' : 
                             row.status === 'moderate' ? 'bg-amber-500' : 'bg-rose-500'
                           }`}
-                          style={{ width: `${row.readiness}%` }}
+                          style={{ width: `${row.readiness || 0}%` }}
                         />
                       </div>
-                      <span className="text-sm font-bold">{row.readiness}</span>
+                      <span className="text-sm font-bold">{row.readiness !== null ? row.readiness : "--"}</span>
                     </div>
                   </td>
                   <td className="p-4">
                     <div className="flex items-center gap-2">
-                      <Moon size={16} className={row.sleep < 7 ? "text-amber-500" : "text-emerald-500"} />
+                      <Moon size={16} className={row.sleep !== "--" && row.sleep < 7 ? "text-amber-500" : row.sleep !== "--" ? "text-emerald-500" : "text-muted-foreground"} />
                       <span>{row.sleep}</span>
                     </div>
                   </td>
@@ -115,10 +123,11 @@ export default function WellnessPage() {
                   </td>
                   <td className="p-4">
                     <span className={`px-2 py-1 rounded text-xs font-bold ${
+                      row.stress === "--" ? 'bg-white/5 text-muted-foreground' :
                       row.stress > 3 ? 'bg-rose-500/20 text-rose-500' : 
                       row.stress > 2 ? 'bg-amber-500/20 text-amber-500' : 'bg-emerald-500/20 text-emerald-500'
                     }`}>
-                      {row.stress} / 5
+                      {row.stress !== "--" ? `${row.stress} / 5` : "--"}
                     </span>
                   </td>
                 </tr>

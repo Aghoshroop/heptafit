@@ -126,6 +126,7 @@ export function TeamClient() {
         actorId: user.uid,
         actorName: userData?.firstName ? `${userData.firstName} ${userData.lastName}` : "Coach",
         actorRole: "Head Coach",
+        organizationId: userData.organizationId,
         athleteId: "system", 
         module: "staff",
         action: "assigned",

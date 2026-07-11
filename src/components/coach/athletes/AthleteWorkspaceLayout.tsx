@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { ArrowLeft, User, Activity, Heart, Ruler, Calendar, ClipboardList, Settings, Mail, FileText, Video, CalendarDays, TrendingUp, ShieldAlert, Coffee, Trophy } from "lucide-react";
 import { StatusChip } from "@/components/ui/StatusChip";
+import { useAthleteWorkspaceMetrics } from "@/lib/hooks/useCoachDashboardMetrics";
 
 const TABS = [
   { name: "Overview", path: "", icon: User },
@@ -37,6 +38,8 @@ export function AthleteWorkspaceLayout({ children }: { children: React.ReactNode
   const [athlete, setAthlete] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  const { status, readiness } = useAthleteWorkspaceMetrics(athleteId);
+
   useEffect(() => {
     if (!athleteId) return;
     
@@ -45,10 +48,7 @@ export function AthleteWorkspaceLayout({ children }: { children: React.ReactNode
         const data = snapshot.data();
         setAthlete({
           uid: snapshot.id,
-          ...data,
-          // Mocks for now
-          readiness: Math.floor(Math.random() * 40) + 60,
-          status: Math.random() > 0.2 ? "Active" : "Injured"
+          ...data
         });
       }
       setLoading(false);
@@ -103,8 +103,8 @@ export function AthleteWorkspaceLayout({ children }: { children: React.ReactNode
               <div className="mb-2">
                 <div className="flex items-center gap-3 mb-1">
                   <h1 className="text-3xl font-black">{athlete.firstName} {athlete.lastName}</h1>
-                  <StatusChip status={athlete.status === "Active" ? "active" : athlete.status === "Injured" ? "danger" : "neutral"}>
-                    {athlete.status}
+                  <StatusChip status={status === "Active" ? "active" : status === "Injured" ? "danger" : status === "Restricted" ? "warning" : "neutral"}>
+                    {status}
                   </StatusChip>
                 </div>
                 <p className="text-muted-foreground font-medium">{athlete.sport || "General Athletics"} • Joined 2026</p>
@@ -114,8 +114,8 @@ export function AthleteWorkspaceLayout({ children }: { children: React.ReactNode
             <div className="flex gap-3 mb-2">
               <div className="bg-background/50 border border-white/5 rounded-xl p-3 text-center min-w-[100px]">
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-1">Readiness</p>
-                <p className={`text-xl font-black ${athlete.readiness >= 80 ? 'text-emerald-500' : athlete.readiness >= 70 ? 'text-blue-500' : 'text-amber-500'}`}>
-                  {athlete.readiness}%
+                <p className={`text-xl font-black ${readiness && readiness >= 80 ? 'text-emerald-500' : readiness && readiness >= 70 ? 'text-blue-500' : readiness ? 'text-amber-500' : 'text-muted-foreground'}`}>
+                  {readiness !== null ? `${readiness}%` : '--'}
                 </p>
               </div>
               <div className="bg-background/50 border border-white/5 rounded-xl p-3 text-center min-w-[100px]">

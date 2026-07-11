@@ -1,100 +1,88 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { useAuth } from "@/context/AuthContext";
-import { useRealtimeData } from "@/lib/hooks/useRealtimeData";
-import { where, orderBy } from "firebase/firestore";
-import { format, subMonths, startOfMonth } from "date-fns";
+import { useCoachDashboardMetrics } from "@/lib/hooks/useCoachDashboardMetrics";
+import { useCoachData } from "@/lib/hooks/useCoachDashboardMetrics";
+import { aggregateTimeSeriesData, AggregationPeriod } from "@/lib/utils/aggregation";
 
 export function TeamPerformanceChart() {
-  const { userData } = useAuth();
-  const orgId = userData?.organizationId || "";
-
-  // Removed orderBy to prevent requiring a composite index in Firebase
-  const { data: activities, loading } = useRealtimeData("activities", [
-    where("organizationId", "==", orgId)
-  ]);
+  const { schedules, loading, orgId } = useCoachData();
+  const [period, setPeriod] = useState<AggregationPeriod>("monthly");
 
   const { chartData, totalPoints, improvement } = useMemo(() => {
-    // We want the last 6 months
-    const dataMap: Record<string, number> = {};
-    const now = new Date();
-    
-    // Initialize the last 6 months to 0
-    for (let i = 5; i >= 0; i--) {
-      const d = subMonths(now, i);
-      dataMap[format(d, "MMM")] = 0;
-    }
+    // Only count completed sessions
+    const completedSchedules = schedules.filter((s: any) => s.isCompleted);
 
-    let total = 0;
-    
-    activities.forEach((activity: any) => {
-      try {
-        const date = activity.createdAt?.toDate ? activity.createdAt.toDate() : new Date(activity.createdAt);
-        const monthStr = format(date, "MMM");
-        
-        if (dataMap[monthStr] !== undefined) {
-          // Each activity adds base points depending on type, fallback to 100
-          dataMap[monthStr] += 100;
-          total += 100;
-        }
-      } catch (err) {}
-    });
+    // Aggregate Training Volume (Duration in mins)
+    const aggregated = aggregateTimeSeriesData(
+      completedSchedules,
+      "date",
+      (item) => Number(item.duration) || 0,
+      period,
+      6 // Look back 6 periods
+    );
 
-    const chartData = Object.keys(dataMap).map(month => ({
-      month,
-      pts: dataMap[month]
+    const chartData = aggregated.map((a) => ({
+      label: a.label,
+      pts: a.value
     }));
 
-    // Calculate improvement vs last month
+    // Calculate total over this window
+    const total = chartData.reduce((sum, item) => sum + item.pts, 0);
+
+    // Calculate improvement vs last period
     let improvement = 0;
     if (chartData.length >= 2) {
-      const currentMonth = chartData[chartData.length - 1].pts;
-      const lastMonth = chartData[chartData.length - 2].pts;
-      improvement = currentMonth - lastMonth;
+      const current = chartData[chartData.length - 1].pts;
+      const last = chartData[chartData.length - 2].pts;
+      improvement = current - last;
     }
 
     return { chartData, totalPoints: total, improvement };
-  }, [activities]);
+  }, [schedules, period]);
 
   if (!orgId) return null;
 
   return (
     <Card glass hoverEffect className="border-primary/20">
       <CardHeader className="flex flex-row justify-between items-center pb-2">
-        <CardTitle className="text-lg font-bold">Team Activity Overview</CardTitle>
-        <select className="bg-background/50 border border-white/10 rounded-md text-xs px-2 py-1 outline-none text-muted-foreground">
-          <option>All Activities</option>
-          <option>Training</option>
-          <option>Medical</option>
+        <CardTitle className="text-lg font-bold">Training Volume (Mins)</CardTitle>
+        <select 
+          className="bg-background/50 border border-white/10 rounded-md text-xs px-2 py-1 outline-none text-muted-foreground"
+          value={period}
+          onChange={(e) => setPeriod(e.target.value as AggregationPeriod)}
+        >
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+          <option value="quarterly">Quarterly</option>
         </select>
       </CardHeader>
       <CardContent className="p-6 pt-0 space-y-6">
         
         <div className="grid grid-cols-3 gap-4 border-b border-white/5 pb-4">
           <div>
-            <p className="text-xs text-muted-foreground">Total Activity Points</p>
+            <p className="text-xs text-muted-foreground">Total Volume</p>
             <p className="text-3xl font-black text-foreground">
-              {totalPoints.toLocaleString()} 
+              {totalPoints.toLocaleString()}
               {improvement > 0 && <span className="text-sm text-emerald-500 font-bold ml-2">↑</span>}
             </p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Highest Volume Month</p>
+            <p className="text-xs text-muted-foreground">Highest Volume</p>
             <p className="text-2xl font-black text-foreground">
-              {chartData.length ? Math.max(...chartData.map(d => d.pts)).toLocaleString() : 0} pts
+              {chartData.length ? Math.max(...chartData.map(d => d.pts)).toLocaleString() : 0}
             </p>
-            <p className="text-[10px] text-muted-foreground">Active Roster</p>
+            <p className="text-[10px] text-muted-foreground">in this window</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Total Improvement</p>
+            <p className="text-xs text-muted-foreground">Trend</p>
             <p className={`text-2xl font-black ${improvement >= 0 ? "text-emerald-500" : "text-rose-500"}`}>
-              {improvement > 0 ? "+" : ""}{improvement.toLocaleString()} pts
+              {improvement > 0 ? "+" : ""}{improvement.toLocaleString()}
             </p>
-            <p className="text-[10px] text-muted-foreground">vs last month</p>
+            <p className="text-[10px] text-muted-foreground">vs last period</p>
           </div>
         </div>
 
@@ -112,11 +100,12 @@ export function TeamPerformanceChart() {
                     <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="month" stroke="#334155" fontSize={10} tickLine={false} axisLine={false} />
+                <XAxis dataKey="label" stroke="#334155" fontSize={10} tickLine={false} axisLine={false} />
                 <YAxis stroke="#334155" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `${(v/1000).toFixed(1)}k`} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: "8px", fontSize: "12px" }}
                   itemStyle={{ color: "#8b5cf6", fontWeight: "bold" }}
+                  formatter={(value: number) => [`${value} mins`, 'Volume']}
                 />
                 <Area type="monotone" dataKey="pts" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorPts)" />
               </AreaChart>

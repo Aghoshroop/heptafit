@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { collection, query, orderBy, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, getDocs } from "firebase/firestore";
+import { collection, query, orderBy, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, getDocs, where } from "firebase/firestore";
+import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -16,10 +17,12 @@ export default function CoachDocumentsPage() {
   const [loading, setLoading] = useState(true);
   const [athletes, setAthletes] = useState<Record<string, string>>({}); // id -> name
 
+  const { userData } = useAuth();
+  
   useEffect(() => {
     // Fetch athletes for mapping names
     const fetchAthletes = async () => {
-      const usersSnap = await getDocs(collection(db, "athletes"));
+      const usersSnap = await getDocs(collection(db, "users"));
       const athleteMap: Record<string, string> = {};
       usersSnap.docs.forEach(d => {
         athleteMap[d.id] = `${d.data().firstName || ""} ${d.data().lastName || ""}`;
@@ -28,20 +31,31 @@ export default function CoachDocumentsPage() {
     };
     fetchAthletes();
 
+    if (!userData?.organizationId) return;
+
     const q = query(
       collection(db, "documents"),
+      where("organizationId", "==", userData.organizationId),
       orderBy("uploadedAt", "desc")
     );
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setDocuments(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       setLoading(false);
+    }, (error) => {
+      console.error("Error fetching documents:", error);
+      setLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [userData?.organizationId]);
 
   const handleUpload = async (url: string, name: string, type: string) => {
+    if (!userData?.organizationId) {
+      toast.error("Organization ID missing");
+      return;
+    }
     try {
       await addDoc(collection(db, "documents"), {
+        organizationId: userData.organizationId,
         athleteId: "global", // Team document
         url,
         name,

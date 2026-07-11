@@ -15,14 +15,29 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/users/$(request.auth.uid));
     }
 
-    function hasUserDoc() {
-      return exists(/databases/$(database)/documents/users/$(request.auth.uid));
-    }
-    
     function getAccountType() {
       return exists(/databases/$(database)/documents/users/$(request.auth.uid)) 
         ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('accountType', '') 
         : '';
+    }
+
+    function getUserOrgId() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) 
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('organizationId', '') 
+        : '';
+    }
+
+    function isSameOrg(docOrgId) {
+      // Allow if doc doesn't strictly have an orgId (for backwards compatibility/global docs) or if it matches
+      return docOrgId == null || docOrgId == getUserOrgId();
+    }
+
+    function isOrgMatchForWrite(reqResource, existingResource) {
+      // Ensure the new data maintains the correct orgId, and if updating, the old data was in the same org
+      let uOrgId = getUserOrgId();
+      let newOrgValid = reqResource.data.get('organizationId', '') == '' || uOrgId == '' || reqResource.data.organizationId == uOrgId;
+      let oldOrgValid = existingResource == null || existingResource.data.get('organizationId', '') == '' || uOrgId == '' || existingResource.data.organizationId == uOrgId;
+      return newOrgValid && oldOrgValid;
     }
 
     // Check user role
@@ -31,7 +46,7 @@ service cloud.firestore {
     }
 
     function isHeadCoach() {
-      return isAuthenticated() && getAccountType() == 'head_coach';
+      return isAuthenticated() && (getAccountType() == 'head_coach' || getAccountType() == 'coach');
     }
 
     function isAthlete() {
@@ -51,11 +66,14 @@ service cloud.firestore {
 
     // USERS COLLECTION
     match /users/{userId} {
-      allow read: if isAuthenticated();
-      // Users can only update their own base profile
-      allow write: if isAuthenticated() && request.auth.uid == userId;
+      allow read: if isAuthenticated() && isSameOrg(resource.data.organizationId);
+      // Users can only update their own base profile, or Head Coach/Staff can update members of their org
+      allow write: if isAuthenticated() && (
+        request.auth.uid == userId || 
+        ((isHeadCoach() || isStaff()) && isOrgMatchForWrite(request.resource, resource))
+      );
 
-      // Allow access to all subcollections (attendance, wellness, metrics, etc.)
+      // Allow access to all subcollections
       match /{document=**} {
         allow read: if isAuthenticated();
         allow write: if isHeadCoach() || isStaff() || (isAuthenticated() && request.auth.uid == userId);
@@ -64,13 +82,11 @@ service cloud.firestore {
 
     // ORGANIZATIONS
     match /organizations/{orgId} {
-      // Anyone logged in can read an org (for joining/invites)
-      allow read: if isAuthenticated();
-      // Only head coaches can create/update their org
-      allow write: if isHeadCoach();
+      allow read: if isAuthenticated(); // Anyone can read an org for joining
+      allow write: if isHeadCoach() && orgId == getUserOrgId(); // Only coach of this org can update it
     }
 
-    // PROFILES (coaches, students, staff)
+    // PROFILES (Legacy)
     match /coaches/{userId} {
       allow read: if isAuthenticated();
       allow write: if isAuthenticated() && request.auth.uid == userId;
@@ -84,29 +100,27 @@ service cloud.firestore {
       allow write: if isAuthenticated() && request.auth.uid == userId;
     }
 
-    // INVITATIONS (Backend verification for joining)
+    // INVITATIONS
     match /coachInvitations/{inviteId} {
       allow read: if isAuthenticated() && resource.data.coachId == request.auth.uid;
-      allow write: if isHeadCoach();
+      allow write: if isAuthenticated() && isOrgMatchForWrite(request.resource, resource);
     }
     match /staffInvitations/{inviteId} {
       allow read: if isAuthenticated();
-      allow write: if isHeadCoach();
+      allow write: if isHeadCoach() && isOrgMatchForWrite(request.resource, resource);
     }
     
-    // APPROVAL REQUESTS (Joining Flow)
+    // APPROVAL REQUESTS
     match /approvalRequests/{requestId} {
-      allow read: if isAuthenticated();
-      // Athletes can create them, coaches can read/update them
+      allow read: if isAuthenticated() && isSameOrg(resource.data.organizationId);
       allow create: if isAuthenticated();
-      allow update, delete: if isHeadCoach();
+      allow update, delete: if isHeadCoach() && isSameOrg(resource.data.organizationId);
     }
 
     // RELATIONSHIPS
     match /coachAthleteRelationships/{relId} {
       allow read: if isAuthenticated();
-      // Coach or Athlete can manage their own relationships
-      allow write: if isAuthenticated();
+      allow write: if isAuthenticated(); // Could be tightened, but both coach and athlete need to manage
     }
     match /staffRelationships/{relId} {
       allow read: if isAuthenticated();
@@ -115,39 +129,35 @@ service cloud.firestore {
 
     // CORE DATA COLLECTIONS (wellness, schedules, notes, etc.)
     match /wellness/{docId} {
-      // Athlete can write their own. Coaches/Staff can read.
-      allow read: if isAuthenticated();
+      allow read: if isAuthenticated() && isSameOrg(resource.data.organizationId);
       allow create, update: if isAuthenticated() && request.resource.data.athleteId == request.auth.uid;
       allow delete: if isAuthenticated() && resource.data.athleteId == request.auth.uid;
     }
 
     match /schedules/{docId} {
-      // Coaches/Staff can write. Athlete can only update isCompleted status.
-      allow read: if isAuthenticated();
-      allow create, delete: if isHeadCoach() || isStaff();
-      allow update: if isAuthenticated(); // Allowed for athletes to toggle complete
+      allow read: if isAuthenticated() && isSameOrg(resource.data.organizationId);
+      allow create, delete: if (isHeadCoach() || isStaff()) && isOrgMatchForWrite(request.resource, resource);
+      allow update: if isAuthenticated() && isOrgMatchForWrite(request.resource, resource); 
     }
 
     match /notes/{docId} {
-      allow read: if isAuthenticated();
-      allow write: if isHeadCoach() || isStaff();
+      allow read: if isAuthenticated() && isSameOrg(resource.data.organizationId);
+      allow write: if (isHeadCoach() || isStaff()) && isOrgMatchForWrite(request.resource, resource);
     }
 
     match /competitions/{docId} {
-      allow read: if isAuthenticated();
-      allow write: if isHeadCoach() || isStaff();
+      allow read: if isAuthenticated() && isSameOrg(resource.data.organizationId);
+      allow write: if (isHeadCoach() || isStaff()) && isOrgMatchForWrite(request.resource, resource);
     }
 
     match /calendarEvents/{docId} {
-      allow read: if isAuthenticated();
-      allow write: if isHeadCoach() || isStaff();
+      allow read: if isAuthenticated() && isSameOrg(resource.data.organizationId);
+      allow write: if (isHeadCoach() || isStaff()) && isOrgMatchForWrite(request.resource, resource);
     }
 
     match /notifications/{docId} {
-      // User can only read and update their own notifications
-      allow read: if isAuthenticated();
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
       allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
-      // Anyone can create a notification for someone else (system-level via client)
       allow create: if isAuthenticated();
     }
 
@@ -158,53 +168,59 @@ service cloud.firestore {
     }
 
     match /medical/{docId} {
-      // Only Physios/Doctors and Head Coaches can read/write medical
-      allow read, write: if isHeadCoach() || isStaff(); // In a real app, restrict to specific staff roles
+      allow read, write: if (isHeadCoach() || isStaff()) && isSameOrg(resource.data.organizationId); 
     }
 
     match /trainingLogs/{docId} {
-      allow read: if isAuthenticated();
-      allow write: if isHeadCoach() || isStaff() || (isAuthenticated() && request.resource.data.athleteId == request.auth.uid);
+      allow read: if isAuthenticated() && isSameOrg(resource.data.organizationId);
+      allow write: if (isHeadCoach() || isStaff() || (isAuthenticated() && request.resource.data.athleteId == request.auth.uid)) && isOrgMatchForWrite(request.resource, resource);
     }
     
     match /attendance/{docId} {
-      allow read: if isAuthenticated();
-      allow write: if isHeadCoach() || isStaff() || isAuthenticated();
+      allow read: if isAuthenticated() && isSameOrg(resource.data.organizationId);
+      allow write: if (isHeadCoach() || isStaff() || isAuthenticated()) && isOrgMatchForWrite(request.resource, resource);
     }
     
     match /invitations/{inviteId} {
-      allow read: if isAuthenticated();
-      allow write: if isHeadCoach();
+      allow read: if isAuthenticated() && isSameOrg(resource.data.organizationId);
+      allow write: if isHeadCoach() && isOrgMatchForWrite(request.resource, resource);
     }
 
     match /auditLogs/{logId} {
-      // Immutable logs. Created by anyone logged in, read by admins/coaches
       allow create: if isAuthenticated();
       allow read: if isHeadCoach() || isSuperAdmin();
-      allow update, delete: if false; // Immutable
+      allow update, delete: if false; 
     }
 
-    // LEGACY / OTHER COLLECTIONS
     match /posts/{docId} {
       allow read, write: if isAuthenticated();
     }
     match /activities/{docId} {
-      allow read, write: if isAuthenticated();
+      allow read: if isAuthenticated() && isSameOrg(resource.data.organizationId);
+      allow write: if isAuthenticated() && isOrgMatchForWrite(request.resource, resource);
     }
     match /groups/{docId} {
-      allow read, write: if isAuthenticated();
+      allow read: if isAuthenticated() && isSameOrg(resource.data.organizationId);
+      allow write: if isAuthenticated() && isOrgMatchForWrite(request.resource, resource);
     }
     match /training_plans/{docId} {
-      allow read, write: if isAuthenticated();
+      allow read: if isAuthenticated() && isSameOrg(resource.data.organizationId);
+      allow write: if isAuthenticated() && isOrgMatchForWrite(request.resource, resource);
     }
     match /athletes/{docId} {
       allow read, write: if isAuthenticated();
     }
     match /insights/{docId} {
-      allow read, write: if isAuthenticated();
+      allow read: if isAuthenticated() && isSameOrg(resource.data.organizationId);
+      allow write: if isAuthenticated() && isOrgMatchForWrite(request.resource, resource);
     }
     match /trainingGroups/{docId} {
-      allow read, write: if isAuthenticated();
+      allow read: if isAuthenticated() && isSameOrg(resource.data.organizationId);
+      allow write: if isAuthenticated() && isOrgMatchForWrite(request.resource, resource);
+    }
+    match /documents/{docId} {
+      allow read: if isAuthenticated() && isSameOrg(resource.data.organizationId);
+      allow write: if isAuthenticated() && isOrgMatchForWrite(request.resource, resource);
     }
   }
 }

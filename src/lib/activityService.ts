@@ -55,11 +55,10 @@ export const logActivity = async ({
 }: LogActivityParams) => {
   try {
     const activityRef = collection(db, "activities");
-    await addDoc(activityRef, {
+    const payload: any = {
       actorId,
       actorName,
       actorRole,
-      organizationId: organizationId || null,
       athleteId, // Explicitly stored for global organization feeds
       module,
       action,
@@ -67,7 +66,13 @@ export const logActivity = async ({
       description,
       metadata,
       createdAt: serverTimestamp(),
-    });
+    };
+    
+    if (organizationId) {
+      payload.organizationId = organizationId;
+    }
+
+    await addDoc(activityRef, payload);
   } catch (error) {
     console.error("Failed to log activity:", error);
     // We intentionally don't throw here to prevent disrupting the main action

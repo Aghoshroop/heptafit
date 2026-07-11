@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { collection, query, where, getDocs, addDoc, serverTimestamp, orderBy, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { useCoachAthletesWithMetrics } from "@/lib/hooks/useCoachDashboardMetrics";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -13,26 +14,22 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { format } from "date-fns";
 
 export default function CoachAttendancePage() {
-  const { user } = useAuth();
-  const [athletes, setAthletes] = useState<any[]>([]);
+  const { user, userData } = useAuth();
+  const { athletes, loading: athletesLoading } = useCoachAthletesWithMetrics();
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [attendanceRecords, setAttendanceRecords] = useState<Record<string, string>>({}); // athleteId -> status
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    const fetchAthletes = async () => {
-      const usersSnap = await getDocs(collection(db, "athletes"));
-      setAthletes(usersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      setLoading(false);
-    };
-    fetchAthletes();
-  }, []);
+    setLoading(athletesLoading);
+  }, [athletesLoading]);
 
   useEffect(() => {
-    if (!selectedDate) return;
+    if (!selectedDate || !userData?.organizationId) return;
     const q = query(
       collection(db, "attendance"),
+      where("organizationId", "==", userData.organizationId),
       where("date", "==", selectedDate)
     );
     
@@ -45,25 +42,30 @@ export default function CoachAttendancePage() {
     });
 
     return () => unsubscribe();
-  }, [selectedDate]);
+  }, [selectedDate, userData?.organizationId]);
 
   const markAttendance = async (athleteId: string, status: 'present' | 'absent' | 'excused') => {
-    if (!user) return;
+    if (!user || !userData?.organizationId) {
+      toast.error("Missing organization ID");
+      return;
+    }
     
     // Optimistic UI
     setAttendanceRecords(prev => ({ ...prev, [athleteId]: status }));
     
     try {
-      // In a real app we should check if doc exists and update, or just use athleteId_date as doc ID
-      const docId = `${athleteId}_${selectedDate}`;
-      const docRef = collection(db, "attendance");
-      
       // Delete existing for this date/athlete (simplification)
-      const q = query(collection(db, "attendance"), where("athleteId", "==", athleteId), where("date", "==", selectedDate));
+      const q = query(
+        collection(db, "attendance"), 
+        where("organizationId", "==", userData.organizationId),
+        where("athleteId", "==", athleteId), 
+        where("date", "==", selectedDate)
+      );
       const snaps = await getDocs(q);
       
       // Instead of complex logic, just add. A real app would use setDoc with a composite ID
       await addDoc(collection(db, "attendance"), {
+        organizationId: userData.organizationId,
         athleteId,
         date: selectedDate,
         status,

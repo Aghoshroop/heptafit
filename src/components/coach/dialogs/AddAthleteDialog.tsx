@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
-import { collection, addDoc, serverTimestamp, doc, setDoc } from "firebase/firestore";
+import { collection, serverTimestamp, doc, writeBatch } from "firebase/firestore";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -30,12 +30,12 @@ export function AddAthleteDialog({ isOpen, onClose }: AddAthleteDialogProps) {
     
     setLoading(true);
     try {
-      // 1. Create a dummy athlete user in the "users" collection directly.
-      // In a real flow, this might be an invitation that the athlete claims,
-      // but creating the user directly makes the dashboard instantly reactive.
+      const batch = writeBatch(db);
+      
       const userRef = doc(collection(db, "users"));
-      await setDoc(userRef, {
+      batch.set(userRef, {
         accountType: "athlete",
+        role: "student",
         organizationId: userData.organizationId,
         headCoachId: userData.accountType === "head_coach" ? userData.uid : userData.organizationId,
         firstName: formData.firstName,
@@ -43,10 +43,19 @@ export function AddAthleteDialog({ isOpen, onClose }: AddAthleteDialogProps) {
         email: formData.email,
         sport: formData.sport,
         event: formData.event,
-        athleteId: `ATH-${Math.floor(1000 + Math.random() * 9000)}`,
-        status: "Active",
+        athleteId: userRef.id,
         createdAt: serverTimestamp(),
       });
+      
+      const relRef = doc(collection(db, "coachAthleteRelationships"));
+      batch.set(relRef, {
+        coachId: userData.uid,
+        studentId: userRef.id,
+        status: "active",
+        createdAt: serverTimestamp()
+      });
+
+      await batch.commit();
 
       toast.success("Athlete added successfully!");
       setFormData({ firstName: "", lastName: "", email: "", sport: "", event: "" });

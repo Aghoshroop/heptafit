@@ -4,18 +4,15 @@ import { useAuth } from "@/context/AuthContext";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Loader2 } from "lucide-react";
 import { StatusChip } from "@/components/ui/StatusChip";
-import { useRealtimeData } from "@/lib/hooks/useRealtimeData";
-import { where } from "firebase/firestore";
 import { useRouter } from "next/navigation";
+import { useCoachAthletesWithMetrics } from "@/lib/hooks/useCoachDashboardMetrics";
 
 export function AthleteRosterTable() {
   const { userData } = useAuth();
   const orgId = userData?.organizationId || "";
   const router = useRouter();
 
-  const { data: athletes, loading } = useRealtimeData("students", [
-    where("headCoachId", "==", userData?.uid || "")
-  ]);
+  const { athletes, loading } = useCoachAthletesWithMetrics();
 
   return (
     <GlassCard className="overflow-hidden">
@@ -70,7 +67,12 @@ export function AthleteRosterTable() {
                       <span className="font-mono text-xs text-muted-foreground bg-white/5 px-2 py-1 rounded-md">{athlete.athleteId || athlete.id.substring(0, 8)}</span>
                     </td>
                     <td className="p-4 pr-6 text-right">
-                      <StatusChip status="success" dot>Active</StatusChip>
+                      <StatusChip 
+                        status={athlete.status === "Active" ? "active" : athlete.status === "Injured" ? "danger" : athlete.status === "Restricted" ? "warning" : "neutral"} 
+                        dot
+                      >
+                        {athlete.status}
+                      </StatusChip>
                     </td>
                   </tr>
                 ))
