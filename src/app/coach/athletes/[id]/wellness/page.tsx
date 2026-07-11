@@ -7,9 +7,8 @@ import { collection, query, onSnapshot, addDoc, serverTimestamp, deleteDoc, doc,
 import { db } from "@/lib/firebase";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { WellnessLog } from "@/lib/types";
-
-
-
+import { Card, CardContent } from "@/components/ui/Card";
+import { AlertCircle, Activity } from "lucide-react";
 export default function WellnessPage() {
   const params = useParams();
   const athleteId = params.id as string;
