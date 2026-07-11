@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { collection, query, onSnapshot, addDoc, getDocs, serverTimestamp } from "firebase/firestore";
+import { collection, query, onSnapshot, addDoc, getDocs, serverTimestamp, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Calendar } from "@/components/Calendar";
 import { Skeleton } from "@/components/ui/Skeleton";
