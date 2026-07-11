@@ -249,7 +249,6 @@ export default function WellnessPage() {
               </div>
             )}
           </div>
-        </div>
       </div>
     </div>
   );
