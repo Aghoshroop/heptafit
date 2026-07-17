@@ -8,7 +8,7 @@ export function CinematicEnding() {
   return (
     <section className="min-h-[80vh] bg-black relative flex items-center justify-center overflow-hidden border-t border-border/10">
       <div className="absolute inset-0 z-0">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-primary/20 blur-[200px] rounded-full mix-blend-screen" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-primary/20  rounded-full " />
       </div>
 
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
@@ -38,7 +38,7 @@ export function CinematicEnding() {
           transition={{ duration: 1, delay: 0.5 }}
           className="flex flex-col sm:flex-row gap-6 justify-center items-center"
         >
-          <Button variant="primary" className="h-16 px-10 text-lg font-bold shadow-[0_0_40px_rgba(168,85,247,0.5)] hover:shadow-[0_0_60px_rgba(168,85,247,0.8)] transition-all">
+          <Button variant="primary" className="h-16 px-10 text-lg font-bold  hover: transition-all">
             Start Free Trial
           </Button>
           <Button variant="outline" className="h-16 px-10 text-lg font-bold border-white/20 text-white hover:bg-white/10 gap-2">

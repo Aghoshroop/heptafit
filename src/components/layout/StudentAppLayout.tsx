@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
@@ -86,10 +87,8 @@ export function StudentAppLayout({ children }: { children: React.ReactNode }) {
       >
         <div className="p-6 flex items-center justify-between">
           <Link href="/athlete" className="flex items-center gap-3 text-xl font-bold">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
-              <Activity size={20} strokeWidth={2.5} />
-            </div>
-            <span className="tracking-tight">AthleteOS</span>
+            <Image src="/logo.png" alt="Heptafit Logo" width={90} height={90} className="w-[90px] h-[90px] object-contain animate-shimmer" />
+            <span className="tracking-tight">Heptafit</span>
           </Link>
           <Button variant="ghost" size="icon" className="lg:hidden text-muted-foreground" onClick={() => setIsSidebarOpen(false)}>
             <X size={20} />

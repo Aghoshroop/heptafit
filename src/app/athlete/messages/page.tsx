@@ -98,10 +98,10 @@ export default function AthleteMessagesPage() {
           <div className="flex-1 overflow-y-auto p-2 space-y-1">
             {coaches.map((coach: any) => (
               <button
-                key={coach.uid}
-                onClick={() => setActiveChat(coach.uid)}
+                key={coach.id}
+                onClick={() => setActiveChat(coach.id)}
                 className={`w-full text-left p-3 rounded-lg transition-colors flex items-center gap-3 ${
-                  activeChat === coach.uid ? "bg-primary/20" : "hover:bg-white/5"
+                  activeChat === coach.id ? "bg-primary/20" : "hover:bg-white/5"
                 }`}
               >
                 <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold shrink-0">
@@ -139,10 +139,10 @@ export default function AthleteMessagesPage() {
               <div className="p-4 border-b border-white/10 bg-black/20 flex justify-between items-center">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
-                    {coaches.find((c: any) => c.uid === activeChat)?.firstName?.[0] || "C"}
+                    {coaches.find((c: any) => c.id === activeChat)?.firstName?.[0] || "C"}
                   </div>
                   <div>
-                    <h3 className="font-bold">{coaches.find((c: any) => c.uid === activeChat)?.firstName} {coaches.find((c: any) => c.uid === activeChat)?.lastName}</h3>
+                    <h3 className="font-bold">{coaches.find((c: any) => c.id === activeChat)?.firstName} {coaches.find((c: any) => c.id === activeChat)?.lastName}</h3>
                     <p className="text-xs text-emerald-500">Online</p>
                   </div>
                 </div>
@@ -159,7 +159,7 @@ export default function AthleteMessagesPage() {
                   const isMe = msg.senderId === user?.uid;
                   return (
                     <div key={msg.id} className={`flex gap-4 ${isMe ? "justify-end" : ""}`}>
-                      {!isMe && <div className="w-8 h-8 rounded-full bg-primary/20 flex-shrink-0 flex items-center justify-center font-bold text-xs">{coaches.find((c: any) => c.uid === activeChat)?.firstName?.[0] || "C"}</div>}
+                      {!isMe && <div className="w-8 h-8 rounded-full bg-primary/20 flex-shrink-0 flex items-center justify-center font-bold text-xs">{coaches.find((c: any) => c.id === activeChat)?.firstName?.[0] || "C"}</div>}
                       <div className={`p-3 rounded-2xl max-w-[80%] text-sm ${isMe ? "bg-blue-600 text-white rounded-tr-sm" : "bg-white/10 rounded-tl-sm"}`}>
                         {msg.text}
                       </div>

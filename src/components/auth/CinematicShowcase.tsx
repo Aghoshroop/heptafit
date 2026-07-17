@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import { LayoutDashboard, Smartphone, Brain, BarChart3, ActivitySquare, HeartPulse, MessageSquare, CalendarDays } from "lucide-react";
+import Image from "next/image";
 
 const features = [
   { icon: LayoutDashboard, title: "Coach Dashboard", desc: "Manage your entire academy from a single pane of glass." },
@@ -37,9 +38,7 @@ export function CinematicShowcase() {
       {/* Top Branding */}
       <div className="relative z-10">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.5)]">
-            <span className="text-white font-black text-lg">H</span>
-          </div>
+          <Image src="/logo.png" alt="Heptafit Logo" width={90} height={90} className="w-[90px] h-[90px] object-contain drop-shadow-[0_0_20px_rgba(168,85,247,0.5)] animate-shimmer" />
           <span className="font-bold text-2xl tracking-tight text-white">Heptafit</span>
         </div>
       </div>

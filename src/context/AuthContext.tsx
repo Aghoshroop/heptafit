@@ -15,6 +15,7 @@ export interface UserData extends Omit<UserBase, 'accountType'> {
   profile?: StudentProfile | CoachProfile;
   firstName?: string;
   lastName?: string;
+  photoURL?: string;
   organizationId?: string;
   accountType: AccountType | "super_admin" | null;
   onboardingStatus: "pending" | "completed";
@@ -98,6 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               profile: profileData,
               firstName: profileData?.firstName || (baseData as any).firstName,
               lastName: profileData?.lastName || (baseData as any).lastName,
+              photoURL: (baseData as any).photoURL || (profileData as any)?.photoURL || "",
               organizationId: orgId,
               accountType: baseData.accountType,
               onboardingStatus: profileData ? "completed" : "pending",

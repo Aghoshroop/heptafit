@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Building2, ArrowRight } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { OnboardingData } from "@/app/get-started/page";
@@ -48,8 +49,8 @@ export function OrgSetup({ initialData, onNext }: OrgSetupProps) {
   return (
     <div className="w-full max-w-xl mx-auto">
       <div className="text-center mb-10">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(168,85,247,0.4)]">
-          <Building2 size={32} className="text-white" />
+        <div className="w-[114px] h-[114px] rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <Image src="/logo.png" alt="Heptafit Logo" width={114} height={114} className="w-[114px] h-[114px] object-contain drop-shadow-[0_0_20px_rgba(168,85,247,0.5)] animate-shimmer" />
         </div>
         <h2 className="text-3xl font-bold mb-3">Setup Organization</h2>
         <p className="text-muted-foreground text-sm max-w-sm mx-auto">

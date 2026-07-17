@@ -13,39 +13,47 @@ export function DayInTheLife() {
   ];
 
   return (
-    <section className="py-32 bg-background relative overflow-hidden">
-      <div className="max-w-3xl mx-auto px-4">
+    <section className="py-32 bg-black relative overflow-hidden">
+      {/* Ambient Radial Glows */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[radial-gradient(circle,rgba(6,182,212,0.1)_0%,transparent_70%)] pointer-events-none " />
+      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[radial-gradient(circle,rgba(168,85,247,0.1)_0%,transparent_70%)] pointer-events-none " />
+
+      <div className="max-w-3xl mx-auto px-4 relative z-10">
         <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">A Day in the Life</h2>
-          <p className="text-xl text-muted-foreground">How the Heptafit OS protects athletes from morning to night.</p>
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-white ">A Day in the Life</h2>
+          <p className="text-xl text-white/70 ">How the Heptafit OS protects athletes from morning to night.</p>
         </div>
 
-        <div className="relative border-l-2 border-border/50 ml-6 md:ml-0 md:border-l-0">
+        <div className="relative border-l-2 border-white/10 ml-6 md:ml-0 md:border-l-0">
           {/* Central Line for Desktop */}
-          <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-1 bg-border/50 -translate-x-1/2"></div>
+          <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-[2px] bg-gradient-to-b from-transparent via-white/10 to-transparent -translate-x-1/2"></div>
           
           <div className="space-y-16">
             {events.map((event, i) => (
               <motion.div 
                 key={i}
                 initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: i * 0.1 }}
-                className={`relative flex flex-col md:flex-row items-center justify-between group ${i % 2 === 0 ? "md:flex-row-reverse" : ""}`}
+                className={`will-change-transform relative flex flex-col md:flex-row items-center justify-between group ${i % 2 === 0 ? "md:flex-row-reverse" : ""}`}
               >
                 {/* Timeline Dot */}
-                <div className="absolute left-[-2.5rem] md:left-1/2 w-8 h-8 rounded-full bg-background border-4 border-primary -translate-x-1/2 flex items-center justify-center z-10 shadow-[0_0_15px_rgba(168,85,247,0.5)] group-hover:scale-125 transition-transform duration-300">
+                <div className="absolute left-[-2.5rem] md:left-1/2 w-8 h-8 rounded-full bg-black border-4 border-primary -translate-x-1/2 flex items-center justify-center z-10  group-hover:scale-125 transition-transform duration-300">
                   <div className="w-2 h-2 rounded-full bg-primary animate-ping"></div>
                 </div>
 
-                <div className={`w-full md:w-[45%] pl-8 md:pl-0 ${i % 2 === 0 ? "md:text-left" : "md:text-right"}`}>
-                  <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold mb-4 border ${event.bg} ${event.color}`}>
-                    <event.icon size={14} /> {event.time}
+                <motion.div 
+                  whileHover={{ scale: 1.02 }}
+                  className={`w-full md:w-[45%] pl-8 md:pl-0 ${i % 2 === 0 ? "md:text-left" : "md:text-right"}`}
+                >
+                  <div className={`p-6 rounded-2xl bg-white/5 border border-white/10   group-hover:border-white/20 transition-colors`}>
+                    <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold mb-4 border ${event.bg} ${event.color} `}>
+                      <event.icon size={14} /> {event.time}
+                    </div>
+                    <h3 className="text-2xl font-bold mb-3 text-white ">{event.title}</h3>
+                    <p className="text-white/70 leading-relaxed">{event.desc}</p>
                   </div>
-                  <h3 className="text-2xl font-bold mb-3">{event.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{event.desc}</p>
-                </div>
+                </motion.div>
               </motion.div>
             ))}
           </div>
@@ -53,14 +61,13 @@ export function DayInTheLife() {
 
         <motion.div 
           initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="mt-20 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-6 text-center"
+          animate={{ opacity: 1 }}
+          className="mt-20 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-6 text-center  "
         >
-          <div className="flex items-center justify-center gap-2 text-emerald-500 font-bold text-lg mb-2">
+          <div className="flex items-center justify-center gap-2 text-emerald-400 font-bold text-lg mb-2 ">
             <CheckCircle2 /> Result: Injury Prevented
           </div>
-          <p className="text-emerald-500/80">Proactive decisions beat reactive rehabilitation every time.</p>
+          <p className="text-emerald-400/80 font-medium">Proactive decisions beat reactive rehabilitation every time.</p>
         </motion.div>
       </div>
     </section>

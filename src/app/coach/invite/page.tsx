@@ -172,7 +172,7 @@ export default function InviteAthletePage() {
                 </div>
                 <div className="text-muted-foreground mt-2 space-y-1">
                   <p>Sport: <span className="text-foreground font-medium">{foundStudent.sport || 'Not specified'}</span></p>
-                  <p>Event: <span className="text-foreground font-medium">{foundStudent.event || 'Not specified'}</span></p>
+                  <p>Event: <span className="text-foreground font-medium">{foundStudent.primaryEvent || 'Not specified'}</span></p>
                 </div>
               </div>
 

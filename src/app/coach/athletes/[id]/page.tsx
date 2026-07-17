@@ -8,6 +8,7 @@ import { Activity, Flame, Trophy, TrendingUp, Moon, Droplet, Brain, Clock, Shiel
 import { Card, CardContent } from "@/components/ui/Card";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { DashboardEngine } from "@/lib/intelligence/dashboardEngine";
 
 export default function AthleteOverviewPage() {
   const params = useParams();
@@ -26,6 +27,8 @@ export default function AthleteOverviewPage() {
     // Subscribe to athlete user doc
     const unsubUser = onSnapshot(doc(db, "users", athleteId), (doc) => {
       if (doc.exists()) setAthlete({ id: doc.id, ...doc.data() });
+    }, (error) => {
+      console.error("AthleteOverviewPage: Error fetching user:", error);
     });
 
     // Subscribe to latest wellness
@@ -38,6 +41,8 @@ export default function AthleteOverviewPage() {
       } else {
         setLatestWellness(null);
       }
+    }, (error) => {
+      console.error("AthleteOverviewPage: Error fetching wellness:", error);
     });
 
     // Subscribe to latest metrics
@@ -45,18 +50,25 @@ export default function AthleteOverviewPage() {
     const unsubMetrics = onSnapshot(qMetrics, (snap) => {
       if (!snap.empty) setLatestMetrics(snap.docs[0].data());
       else setLatestMetrics(null);
+    }, (error) => {
+      console.error("AthleteOverviewPage: Error fetching metrics:", error);
     });
 
     // Subscribe to recent notes
     const qNotes = query(collection(db, "users", athleteId, "coach_notes"), orderBy("createdAt", "desc"), limit(2));
     const unsubNotes = onSnapshot(qNotes, (snap) => {
       setRecentNotes(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    }, (error) => {
+      console.error("AthleteOverviewPage: Error fetching notes:", error);
     });
 
     // Subscribe to recent activities (Timeline)
     const qActivities = query(collection(db, "users", athleteId, "activities"), orderBy("createdAt", "desc"), limit(4));
     const unsubActivities = onSnapshot(qActivities, (snap) => {
       setRecentActivities(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setLoading(false);
+    }, (error) => {
+      console.error("AthleteOverviewPage: Error fetching activities:", error);
       setLoading(false);
     });
 
@@ -93,9 +105,30 @@ export default function AthleteOverviewPage() {
           <p className="text-muted-foreground text-sm">Real-time overview of athlete performance and status.</p>
         </div>
       </div>
+
+      {/* Temporary Debug Panel */}
+      <div className="bg-zinc-900 border border-amber-500/30 p-4 rounded-xl mb-6">
+        <h3 className="text-amber-500 font-bold mb-2">Development Debug Panel - Metadata Engine</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 text-xs font-mono">
+          <div><span className="text-muted-foreground">Sport:</span> {athlete?.sport || 'N/A'}</div>
+          <div><span className="text-muted-foreground">Discipline:</span> {athlete?.discipline || 'N/A'}</div>
+          <div><span className="text-muted-foreground">Category:</span> {athlete?.category || 'N/A'}</div>
+          <div><span className="text-muted-foreground">Primary Event:</span> {athlete?.primaryEvent || 'N/A'}</div>
+          <div><span className="text-muted-foreground">Perf. Profile:</span> {athlete?.performanceProfile || 'General'}</div>
+        </div>
+      </div>
+      
+      {/* Dynamic Intelligence Engine Dashboard */}
+      {athlete && (
+        <DashboardEngine 
+          performanceProfile={athlete.performanceProfile} 
+          primaryEvent={athlete.primaryEvent}
+          athleteId={athleteId} 
+        />
+      )}
       
       {/* Top Priority Grid - 6 Items */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mt-6">
         <Card glass className="border-white/5">
           <CardContent className="p-4 relative overflow-hidden group">
             <div className="flex flex-col h-full justify-between">

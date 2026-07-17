@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { 
@@ -39,10 +40,8 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between p-4 border-b border-border bg-card/50 backdrop-blur-md sticky top-0 z-30">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center">
-            <span className="text-white font-bold text-sm">S</span>
-          </div>
-          <span className="font-bold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-400">Super Admin</span>
+          <Image src="/logo.png" alt="Heptafit Logo" width={82} height={82} className="w-[82px] h-[82px] object-contain drop-shadow-[0_0_15px_rgba(168,85,247,0.5)] animate-shimmer" />
+          <span className="font-bold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-400">Heptafit Admin</span>
         </div>
         <button 
           onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -67,11 +66,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
       `}>
         <div className="p-6 hidden md:flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/20">
-            <span className="text-white font-bold text-lg">S</span>
-          </div>
+          <Image src="/logo.png" alt="Heptafit Logo" width={90} height={90} className="w-[90px] h-[90px] object-contain drop-shadow-[0_0_15px_rgba(168,85,247,0.5)] animate-shimmer" />
           <div>
-            <h1 className="font-bold text-lg tracking-tight leading-none bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-400">Super Admin</h1>
+            <h1 className="font-bold text-lg tracking-tight leading-none bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-400">Heptafit Admin</h1>
             <p className="text-xs text-muted-foreground mt-1">Control Center</p>
           </div>
         </div>

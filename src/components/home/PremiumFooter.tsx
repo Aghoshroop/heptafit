@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 export function PremiumFooter() {
   return (
     <footer className="bg-black border-t border-border/10 pt-24 pb-12 text-sm text-white/60">
@@ -7,9 +9,7 @@ export function PremiumFooter() {
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-12 mb-16">
           <div className="col-span-2 lg:col-span-2">
             <div className="flex items-center gap-2 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.5)]">
-                <span className="text-white font-black text-lg">H</span>
-              </div>
+              <Image src="/logo.png" alt="Heptafit Logo" width={90} height={90} className="w-[90px] h-[90px] object-contain  animate-shimmer" />
               <span className="font-bold text-2xl tracking-tight text-white">Heptafit</span>
             </div>
             <p className="mb-6 max-w-sm leading-relaxed">

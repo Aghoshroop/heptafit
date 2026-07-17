@@ -44,6 +44,8 @@ export function AthletesClient() {
     );
     const unsubscribeInv = onSnapshot(invQuery, (snapshot) => {
       setInvitations(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    }, (error) => {
+      console.error("AthletesClient: Error fetching coachInvitations:", error);
     });
 
     return () => {

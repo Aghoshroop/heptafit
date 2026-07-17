@@ -21,7 +21,7 @@ export function HeroCinematic() {
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="flex flex-col items-start text-left max-w-[500px] pointer-events-auto"
+          className="flex flex-col items-start text-left max-w-[500px] pointer-events-auto md:ml-[250px]"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-bold tracking-[0.2em] uppercase text-primary mb-6 shadow-[0_0_15px_rgba(168,85,247,0.3)] backdrop-blur-sm">
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
@@ -35,12 +35,12 @@ export function HeroCinematic() {
             </span>
           </h1>
 
-          <p className="text-lg md:text-xl text-white/80 mb-10 leading-relaxed font-medium drop-shadow-md pr-4">
+          <p className="text-lg md:text-xl text-white/80 mb-10 leading-relaxed font-medium  pr-4">
             Train athletes. Monitor readiness. Prevent injuries. Manage your academy—all in one AI-powered platform.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 mb-10 w-full sm:w-auto">
-            <Link href="/get-started" className="w-full sm:w-auto">
+            <Link href="/pricing" className="w-full sm:w-auto">
               <Button variant="primary" className="w-full h-14 px-8 text-base font-bold shadow-[0_0_30px_-5px_rgba(168,85,247,0.6)] hover:shadow-[0_0_40px_-5px_rgba(168,85,247,0.8)] hover:scale-105 transition-all">
                 Start Free Trial <ArrowRight size={18} className="ml-2" />
               </Button>

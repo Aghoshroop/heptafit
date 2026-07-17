@@ -3,74 +3,131 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
-import { collection, query, where, onSnapshot, orderBy, limit, doc, updateDoc } from "firebase/firestore";
-import { format, differenceInDays } from "date-fns";
-import { Card, CardContent } from "@/components/ui/Card";
+import { collection, query, where, onSnapshot, orderBy, doc, updateDoc, limit } from "firebase/firestore";
+import { format, differenceInDays, subDays, addDays, isSameDay } from "date-fns";
 import { 
-  Activity, Calendar, ChevronRight, Zap, Target, ArrowUpRight, Flame, Heart, Droplets, Moon
+  Activity, Calendar, ChevronRight, Zap, Target, ArrowUpRight, Flame, Heart, Droplets, Moon, CheckCircle2, Dumbbell, TrendingUp, AlertTriangle, ArrowRight, ArrowUp
 } from "lucide-react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { LineChart, Line, ResponsiveContainer } from "recharts";
-import { MyTeamWidget } from "@/components/student/MyTeamWidget";
-import { EmptyState } from "@/components/ui/EmptyState";
+import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { PremiumButton } from "@/components/ui/PremiumButton";
 import { getPendingInvitations, acceptCoachInvitation, declineCoachInvitation } from "@/lib/services/athlete.service";
 import { CoachInvitation } from "@/lib/types";
+import Script from "next/script";
+import { DashboardEngine } from "@/lib/intelligence/dashboardEngine";
+
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      'spline-viewer': any;
+    }
+  }
+}
+
+// Subcomponents: CircularProgress
+const CircularProgress = ({ value, max, label, target, colorClass }: any) => {
+  const radius = 24;
+  const circumference = 2 * Math.PI * radius;
+  
+  // For things like 100m sprint where lower is better, we invert the percent logic for progress bar
+  let percent = 0;
+  if (label.includes('Sprint')) {
+    // arbitrary max for visual
+    percent = Math.max(0, Math.min(((20 - value) / (20 - target)) * 100, 100));
+  } else {
+    percent = Math.min((value / max) * 100, 100);
+  }
+  
+  const offset = circumference - (percent / 100) * circumference;
+
+  return (
+    <div className="flex items-center gap-4 bg-white/5 rounded-2xl p-4 border border-white/5">
+      <div className="relative w-14 h-14 flex items-center justify-center">
+        <svg className="w-full h-full transform -rotate-90">
+          <circle className="text-white/10" strokeWidth="3" stroke="currentColor" fill="transparent" r={radius} cx="28" cy="28" />
+          <circle 
+            className={`${colorClass} transition-all duration-1000 ease-in-out`}
+            strokeWidth="3" strokeDasharray={circumference} strokeDashoffset={offset}
+            strokeLinecap="round" stroke="currentColor" fill="transparent" r={radius} cx="28" cy="28" 
+          />
+        </svg>
+        <div className="absolute flex items-center justify-center inset-0 text-[10px] font-bold">{Math.round(percent)}%</div>
+      </div>
+      <div>
+        <p className="text-xs text-muted-foreground font-semibold mb-1">{label}</p>
+        <p className="text-lg font-black leading-none mb-1">{value.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">{label.includes('Score') ? 'pts' : label.includes('Sprint') ? 'sec' : label.includes('Jump') ? 'm' : '%'}</span></p>
+        <p className="text-[10px] text-muted-foreground">Target: {target.toLocaleString()}</p>
+      </div>
+    </div>
+  );
+};
 
 export default function StudentDashboard() {
   const { user, userData } = useAuth();
   
-  // Real-time states
   const [schedules, setSchedules] = useState<any[]>([]);
-  const [coachPriority, setCoachPriority] = useState<any>(null);
-  const [nextComp, setNextComp] = useState<any>(null);
-  const [readiness, setReadiness] = useState<number | null>(null);
   const [latestWellness, setLatestWellness] = useState<any>(null);
   const [pendingInvites, setPendingInvites] = useState<CoachInvitation[]>([]);
+  const [metricsHistory, setMetricsHistory] = useState<any[]>([]);
   
+  // States for calculated data
+  const [readiness, setReadiness] = useState<number>(0);
+  const [weeklyLoad, setWeeklyLoad] = useState<number>(0);
+  const [trainingStreak, setTrainingStreak] = useState<number>(0);
+  const [completionRate, setCompletionRate] = useState<number>(0);
+  const [fatigueLevel, setFatigueLevel] = useState<string>("Optimal");
+
   useEffect(() => {
     if (!user?.uid) return;
-    const todayStr = format(new Date(), "yyyy-MM-dd");
 
-    // 1. Listen to Today's Schedules
-    const scheduleQ = query(collection(db, "schedules"), where("athleteId", "==", user.uid), where("date", "==", todayStr));
+    // 1. Listen to past 30 days and next 7 days of schedules
+    const thirtyDaysAgo = subDays(new Date(), 30);
+    const scheduleQ = query(
+      collection(db, "schedules"), 
+      where("athleteId", "==", user.uid)
+    );
+    
     const unsubSchedule = onSnapshot(scheduleQ, (snap) => {
-      setSchedules(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    }, (err) => console.error("unsubSchedule error:", err));
+      const allSchedules = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      
+      // Filter out schedules way too far in the past/future client-side
+      const relevantSchedules = allSchedules.filter((s:any) => new Date(s.date) >= thirtyDaysAgo);
+      
+      relevantSchedules.sort((a:any, b:any) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      setSchedules(relevantSchedules);
 
-    // 2. Listen to Coach Notes/Priorities (Client-side sorted)
-    const notesQ = query(collection(db, "notes"), where("athleteId", "==", user.uid));
-    const unsubNotes = onSnapshot(notesQ, (snap) => {
-      if (!snap.empty) {
-        const notes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        notes.sort((a: any, b: any) => {
-          const aTime = a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
-          const bTime = b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
-          return bTime - aTime;
-        });
-        setCoachPriority(notes[0]);
+      // Calculate Metrics
+      const today = new Date();
+      const sevenDaysAgo = subDays(today, 7);
+      
+      // Load
+      const recentSchedules = relevantSchedules.filter((s:any) => new Date(s.date) >= sevenDaysAgo && new Date(s.date) <= today && s.isCompleted);
+      const load = recentSchedules.reduce((acc: number, s: any) => acc + (s.duration * (s.rpe || 5)), 0);
+      setWeeklyLoad(load);
+
+      // Completion Rate for last 7 days
+      const last7DaysSchedules = relevantSchedules.filter((s:any) => new Date(s.date) >= sevenDaysAgo && new Date(s.date) <= today);
+      const completedLast7 = last7DaysSchedules.filter((s: any) => s.isCompleted).length;
+      setCompletionRate(last7DaysSchedules.length > 0 ? Math.round((completedLast7 / last7DaysSchedules.length) * 100) : 0);
+
+      // Streak
+      let streak = 0;
+      for (let i = 0; i < 30; i++) {
+        const d = subDays(today, i);
+        const daySchedules = relevantSchedules.filter((s: any) => isSameDay(new Date(s.date), d));
+        if (daySchedules.length > 0 && daySchedules.some((s: any) => s.isCompleted)) {
+          streak++;
+        } else if (daySchedules.length > 0 && !daySchedules.some((s: any) => s.isCompleted)) {
+          break; // Missed a day
+        }
       }
-    }, (err) => console.error("unsubNotes error:", err));
+      setTrainingStreak(streak);
 
-    // 3. Listen to Next Competition
-    if (userData?.organizationId) {
-      const compQ = query(
-        collection(db, "competitions"), 
-        where("organizationId", "==", userData.organizationId),
-        orderBy("date", "asc")
-      );
-      const unsubComp = onSnapshot(compQ, (snap) => {
-        const futureComps = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter((c:any) => new Date(c.date) >= new Date());
-        if (futureComps.length > 0) setNextComp(futureComps[0]);
-      }, (err) => console.error("unsubComp error:", err));
-      // Cleanup will be tricky if we nest, so we just declare let and assign
-      // but to keep it simple we'll just handle it
-      (window as any).unsubComp = unsubComp;
-    }
+    }, (err) => console.error(err));
 
-    // 4. Listen to Wellness Logs for Readiness
+    // 2. Listen to Wellness Logs
     const wellnessQ = query(
       collection(db, "wellness"),
       where("athleteId", "==", user.uid)
@@ -78,385 +135,101 @@ export default function StudentDashboard() {
     const unsubWellness = onSnapshot(wellnessQ, (snap) => {
       if (!snap.empty) {
         const docsData = snap.docs.map(d => d.data());
-        // Sort client-side to avoid requiring a composite index in Firestore
         docsData.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        
         const latest = docsData[0];
         setLatestWellness(latest);
-        setReadiness(latest.readinessScore || null);
+        setReadiness(latest.readinessScore || 87); // fallback to 87 for UI test
+        
+        // Derive fatigue
+        if (latest.muscleSoreness === 1 || latest.energyLevel === 1) setFatigueLevel("High");
+        else if (latest.muscleSoreness === 2 || latest.energyLevel === 2) setFatigueLevel("Moderate");
+        else setFatigueLevel("Optimal");
+      } else {
+        setReadiness(87);
+        setFatigueLevel("Moderate");
       }
-    }, (err) => console.error("unsubWellness error:", err));
+    }, (err) => console.error(err));
 
-    // 4. Fetch Pending Invites
-    const fetchInvites = async () => {
-      try {
-        const invites = await getPendingInvitations(user.uid);
-        setPendingInvites(invites);
-      } catch (err) {
-        console.error("Error fetching invites:", err);
-      }
-    };
-    fetchInvites();
+    // 3. Mock Performance History
+    setMetricsHistory([
+      { month: 'Dec', pts: 4500 },
+      { month: 'Jan', pts: 4800 },
+      { month: 'Feb', pts: 4750 },
+      { month: 'Mar', pts: 5100 },
+      { month: 'Apr', pts: 5300 },
+      { month: 'May', pts: 5500 },
+    ]);
+
+    // 4. Fetch Invites
+    getPendingInvitations(user.uid).then(setPendingInvites).catch(console.error);
 
     return () => { 
       unsubSchedule(); 
-      unsubNotes(); 
-      if ((window as any).unsubComp) (window as any).unsubComp(); 
       unsubWellness();
     };
-  }, [user, userData?.organizationId]);
+  }, [user]);
 
-  const handleAcceptInvite = async (invitation: CoachInvitation) => {
-    if (!userData?.profile) return;
-    try {
-      await acceptCoachInvitation(invitation);
-      setPendingInvites(prev => prev.filter(i => i.id !== invitation.id));
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleDeclineInvite = async (invitationId: string) => {
-    try {
-      await declineCoachInvitation(invitationId);
-      setPendingInvites(prev => prev.filter(i => i.id !== invitationId));
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  // Derived lists
+  const today = new Date();
+  const todaysPlan = schedules.filter((s: any) => isSameDay(new Date(s.date), today));
+  const upcomingPlan = schedules.filter((s: any) => new Date(s.date) > today && new Date(s.date) <= addDays(today, 3));
 
   const handleToggleComplete = async (scheduleId: string, currentStatus: boolean) => {
     try {
       await updateDoc(doc(db, "schedules", scheduleId), { isCompleted: !currentStatus });
     } catch (error) {
-      console.error("Error updating schedule:", error);
+      console.error(error);
     }
   };
 
-  const getCompletionPercentage = () => {
-    if (schedules.length === 0) return 0;
-    const completed = schedules.filter(s => s.isCompleted).length;
-    return Math.round((completed / schedules.length) * 100);
-  };
-
-  const readinessColor = readiness && readiness > 80 ? "text-primary" : readiness && readiness > 60 ? "text-amber-500" : "text-rose-500";
-  const daysToComp = nextComp ? differenceInDays(new Date(nextComp.date), new Date()) : null;
+  const readinessColor = readiness >= 80 ? "text-emerald-500" : readiness >= 60 ? "text-amber-500" : "text-rose-500";
+  const readinessBg = readiness >= 80 ? "bg-emerald-500/10 border-emerald-500/20" : readiness >= 60 ? "bg-amber-500/10 border-amber-500/20" : "bg-rose-500/10 border-rose-500/20";
 
   return (
-    <div className="space-y-6 pb-20 max-w-[1600px] mx-auto text-foreground">
+    <div className="max-w-[1600px] mx-auto text-foreground pb-20 space-y-6">
       
-      {/* INVITATION BANNER */}
-      {pendingInvites.length > 0 && (
-        <div className="bg-primary/10 border border-primary/20 rounded-2xl p-6 shadow-xl mb-6">
-          <h2 className="text-xl font-bold mb-4">Pending Coach Invitations</h2>
-          <div className="space-y-4">
-            {pendingInvites.map(invite => (
-              <div key={invite.id} className="flex items-center justify-between bg-background/50 p-4 rounded-xl border border-white/5">
-                <div>
-                  <p className="font-bold text-lg">{invite.coachName}</p>
-                  <p className="text-sm text-muted-foreground">Wants to add you to their roster.</p>
-                </div>
-                <div className="flex gap-3">
-                  <PremiumButton variant="outline" onClick={() => handleDeclineInvite(invite.id)}>
-                    Decline
-                  </PremiumButton>
-                  <PremiumButton onClick={() => handleAcceptInvite(invite)}>
-                    Accept
-                  </PremiumButton>
-                </div>
-              </div>
-            ))}
-          </div>
+      {/* HEADER & NAV */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight mb-1 flex items-center gap-2">
+            Good morning, {userData?.firstName || "Athlete"} <span className="wave">👋</span>
+          </h1>
+          <p className="text-muted-foreground text-sm">Stay focused. Stay consistent. Become your best.</p>
         </div>
-      )}
-      
-      {/* 1. HERO SECTION (Daily Command Center) */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-[2.5rem] p-8 lg:p-12 shadow-2xl bg-card/60 backdrop-blur-2xl border border-white/10"
-      >
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/20 blur-[120px] rounded-full pointer-events-none transform translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent/20 blur-[100px] rounded-full pointer-events-none transform -translate-x-1/2 translate-y-1/2" />
         
-        <div className="relative z-10 flex flex-col lg:flex-row items-center lg:items-end justify-between gap-8">
-          
-          {/* Identity & Status */}
-          <div className="flex flex-col sm:flex-row items-center gap-6">
-            <div className="relative">
-              <div className="w-24 h-24 lg:w-32 lg:h-32 rounded-[2rem] overflow-hidden border-2 border-white/20 shadow-2xl relative z-10 bg-card">
-                {userData?.profile?.profilePhotoUrl ? (
-                  <Image src={userData.profile.profilePhotoUrl} alt="" fill className="object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-4xl font-bold bg-gradient-to-br from-primary to-accent text-primary-foreground">
-                    {userData?.firstName?.[0]}{userData?.lastName?.[0]}
-                  </div>
-                )}
-              </div>
-              {readiness && readiness > 80 && (
-                <motion.div 
-                  initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.5, type: "spring" }}
-                  className="absolute -bottom-3 -right-3 w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-[0_0_20px_var(--primary)] z-20 border-2 border-background text-primary-foreground"
-                >
-                  <Flame size={20} />
-                </motion.div>
-              )}
-            </div>
-
-            <div className="text-center sm:text-left">
-              <p className="text-primary font-bold uppercase tracking-[0.2em] text-xs mb-2">Prime Status</p>
-              <h1 className="text-4xl lg:text-5xl font-black tracking-tight mb-2">
-                Ready to <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Perform.</span>
-              </h1>
-              <p className="text-muted-foreground text-lg">Let's crush today's objectives, {userData?.firstName || "Athlete"}.</p>
-            </div>
-          </div>
-
-          {/* Invite Code & Quick Metrics */}
-          <div className="flex flex-col gap-4 w-full lg:w-auto">
-            {(userData?.profile as any)?.inviteCode && (
-              <div className="bg-background/40 backdrop-blur-md border border-white/10 px-6 py-4 rounded-2xl flex items-center justify-between gap-6 shadow-xl">
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold mb-1">Invite Code</p>
-                  <p className="font-mono text-xl font-black tracking-[0.2em] text-primary">{(userData?.profile as any).inviteCode}</p>
-                </div>
-                <button 
-                  onClick={() => {
-                    navigator.clipboard.writeText((userData?.profile as any)?.inviteCode || "");
-                    // Ideally use a toast here
-                  }}
-                  className="px-4 py-2 bg-accent/20 text-accent font-semibold rounded-lg hover:bg-accent/30 transition-colors text-sm"
-                >
-                  Copy
-                </button>
-              </div>
-            )}
-            
-            <div className="flex gap-4">
-              <div className="flex-1 bg-white/5 border border-white/10 px-6 py-4 rounded-2xl flex flex-col items-center justify-center shadow-lg">
-                <p className="text-xs text-muted-foreground uppercase tracking-widest font-semibold mb-1">Readiness</p>
-                {readiness !== null ? (
-                  <p className={`text-4xl font-black ${readinessColor}`}>{readiness}</p>
-                ) : (
-                  <p className="text-xl font-black text-muted-foreground mt-2">--</p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        {/* =======================================================================
-            MAIN COLUMN (8/12)
-            ======================================================================= */}
-        <div className="lg:col-span-8 space-y-6">
-          
-          {/* Row 1: Today's Action Plan */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="glass rounded-[2rem] p-6 lg:p-8 hover:-translate-y-1 transition-transform duration-300 shadow-xl border border-white/20"
-          >
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h2 className="text-2xl font-bold tracking-tight mb-1">Action Plan</h2>
-                <p className="text-muted-foreground text-sm">Your scheduled sessions for today</p>
-              </div>
-              <div className="text-right">
-                <p className="text-4xl font-black text-primary">{getCompletionPercentage()}%</p>
-                <p className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">Completed</p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              {schedules.length === 0 ? (
-                <EmptyState 
-                  compact
-                  icon={<Calendar size={24} className="text-emerald-500" />}
-                  title="No Sessions Today"
-                  description="Rest up! You have no training scheduled for today."
-                  className="bg-emerald-500/5 border-none"
-                />
-              ) : (
-                schedules.map((schedule, idx) => (
-                  <motion.div 
-                    key={schedule.id}
-                    initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 + (idx * 0.1) }}
-                    className={`relative p-5 rounded-2xl border transition-all duration-300 ${
-                      schedule.isCompleted ? 'bg-primary/5 border-primary/20' : 'bg-white/5 border-white/5 hover:bg-white/10'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <button 
-                          onClick={() => handleToggleComplete(schedule.id, schedule.isCompleted)}
-                          className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
-                            schedule.isCompleted 
-                              ? 'bg-primary text-primary-foreground shadow-[0_0_15px_var(--primary)]' 
-                              : 'bg-white/10 text-muted-foreground hover:bg-white/20'
-                          }`}
-                        >
-                          <Zap size={20} className={schedule.isCompleted ? 'fill-current' : ''} />
-                        </button>
-                        <div>
-                          <h3 className={`text-lg font-bold transition-colors ${schedule.isCompleted ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
-                            {schedule.title}
-                          </h3>
-                          <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
-                            <span className="flex items-center gap-1"><Calendar size={14} /> {schedule.type}</span>
-                            <span>•</span>
-                            <span>{schedule.duration} mins</span>
-                          </div>
-                        </div>
-                      </div>
-                      <ChevronRight size={20} className="text-muted-foreground opacity-50" />
-                    </div>
-                  </motion.div>
-                ))
-              )}
-            </div>
-          </motion.div>
-
-          {/* Row 2: Recovery Intelligence */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-6"
-          >
-            {/* Coach Priority */}
-            <div className="glass rounded-[2rem] p-6 lg:p-8 bg-gradient-to-br from-accent/10 to-transparent border-accent/20 hover:-translate-y-1 transition-transform duration-300 shadow-xl">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center text-primary-foreground shadow-[0_0_15px_var(--accent)]">
-                  <Target size={20} />
-                </div>
-                <h2 className="text-xl font-bold tracking-tight">Coach Priority</h2>
-              </div>
-              
-              {coachPriority ? (
-                <div className="space-y-4">
-                  <p className="text-lg leading-relaxed font-medium">"{coachPriority.content}"</p>
-                  <p className="text-xs text-muted-foreground uppercase tracking-widest font-semibold flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-                    Active Focus
-                  </p>
-                </div>
-              ) : (
-                <p className="text-muted-foreground">No specific notes from coach today.</p>
-              )}
-            </div>
-
-            {/* Smart Insights */}
-            <div className="glass rounded-[2rem] p-6 lg:p-8 hover:-translate-y-1 transition-transform duration-300 shadow-xl border border-white/20">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold tracking-tight">Recovery Intel</h2>
-                <Heart size={20} className="text-primary" />
-              </div>
-              {latestWellness ? (
-                <>
-                  <p className="text-sm text-muted-foreground mb-6">
-                    <strong className="text-foreground">Optimal State:</strong> Based on your latest log, your readiness is {latestWellness.readinessScore || "--"}/100.
-                  </p>
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex justify-between text-xs mb-2 uppercase tracking-widest font-semibold">
-                        <span className="text-muted-foreground flex items-center gap-1"><Moon size={12}/> Sleep</span>
-                        <span className="text-emerald-500">{latestWellness.sleepHours || "--"} hours</span>
-                      </div>
-                      <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                        <div className="h-full bg-emerald-500 rounded-full w-[90%] shadow-[0_0_10px_#10b981]" style={{ width: `${Math.min(((latestWellness.sleepHours || 0) / 10) * 100, 100)}%` }} />
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-xs mb-2 uppercase tracking-widest font-semibold">
-                        <span className="text-muted-foreground flex items-center gap-1"><Activity size={12}/> HRV</span>
-                        <span className="text-primary">{latestWellness.hrv || "--"} ms</span>
-                      </div>
-                      <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                        <div className="h-full bg-primary rounded-full w-[85%] shadow-[0_0_10px_var(--primary)]" style={{ width: `${Math.min(((latestWellness.hrv || 0) / 100) * 100, 100)}%` }} />
-                      </div>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="py-6">
-                  <EmptyState 
-                    compact
-                    icon={<Heart size={20} className="text-muted-foreground" />}
-                    title="No Wellness Data"
-                    description="Log your daily wellness to see your recovery intel."
-                    className="bg-white/5 border-none"
-                  />
-                </div>
-              )}
-            </div>
-          </motion.div>
-
-        </div>
-
-        {/* =======================================================================
-            RIGHT COLUMN (4/12)
-            ======================================================================= */}
-        <div className="lg:col-span-4 space-y-6">
-          
-          {/* Horizon (Competition) */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-            className="glass rounded-[2rem] p-6 relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300 shadow-xl border border-white/20"
-          >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2 group-hover:bg-primary/20 transition-colors" />
-            
-            <h2 className="text-lg font-bold tracking-tight mb-6">The Horizon</h2>
-            
-            {nextComp ? (
-              <div className="space-y-6">
-                <div className="flex items-end justify-between">
-                  <p className="text-5xl font-black text-primary tracking-tighter">{daysToComp}</p>
-                  <p className="text-sm uppercase tracking-widest text-muted-foreground font-semibold mb-1">Days Out</p>
-                </div>
-                <div>
-                  <p className="font-bold text-lg">{nextComp.name}</p>
-                  <p className="text-sm text-muted-foreground">{nextComp.location}</p>
-                </div>
-                <div className="pt-4 border-t border-white/5 flex gap-2">
-                  <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-xs font-bold uppercase tracking-wider">Registered</span>
-                  <span className="px-3 py-1 rounded-full bg-white/5 text-muted-foreground text-xs font-bold uppercase tracking-wider">A-Race</span>
-                </div>
-              </div>
-            ) : (
-              <EmptyState 
-                compact
-                icon={<Target size={20} className="text-muted-foreground" />}
-                title="No Events"
-                description="No upcoming competitions."
-                className="bg-white/5 border-none mt-4"
-              />
-            )}
-          </motion.div>
-
-          {/* Performance Trend Placeholder */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-            className="glass rounded-[2rem] p-6 hover:-translate-y-1 transition-transform duration-300 shadow-xl border border-white/20"
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold tracking-tight">Load Trend</h2>
-              <Activity size={18} className="text-muted-foreground" />
-            </div>
-            
-            <EmptyState 
-              compact
-              icon={<Activity size={20} className="text-muted-foreground" />}
-              title="No Data"
-              description="No recent activity logged."
-              className="bg-white/5 border-none"
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <input 
+              type="text" 
+              placeholder="Search sessions, plans, documents..." 
+              className="pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm w-64 focus:outline-none focus:border-primary/50"
             />
-          </motion.div>
-
-          {/* Support Team */}
-          <MyTeamWidget />
-
+            <svg className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          </div>
+          <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-muted-foreground">
+            <Calendar size={16} />
+            {format(new Date(), "MMM dd, yyyy")}
+          </div>
         </div>
       </div>
+
+      <div className="flex gap-8 border-b border-white/10 overflow-x-auto no-scrollbar">
+        {["Overview", "My Plan", "Sessions", "Performance", "Wellness", "Progress", "Calendar", "Documents"].map((tab, i) => (
+          <button key={tab} className={`pb-3 whitespace-nowrap font-medium text-sm transition-colors relative ${i === 0 ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}>
+            {tab}
+            {i === 0 && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-t-full shadow-[0_-2px_10px_var(--color-primary)]" />}
+          </button>
+        ))}
+      </div>
+
+      <div className="pt-6">
+        <DashboardEngine 
+          performanceProfile={(userData?.profile as any)?.performanceProfile || 'General'} 
+          primaryEvent={(userData?.profile as any)?.primaryEvent || ''}
+          athleteId={user?.uid || ''} 
+        />
+      </div>
+
     </div>
   );
 }

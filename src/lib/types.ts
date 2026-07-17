@@ -27,10 +27,14 @@ export interface StudentProfile {
   firstName: string;
   lastName: string;
   sport?: string;
-  event?: string;
+  discipline?: string;
+  category?: string;
+  performanceProfile?: string;
+  primaryEvent?: string;
   secondaryEvents?: string[];
   dateOfBirth?: string;
-  gender?: string;
+  gender?: "Men" | "Women" | "Mixed";
+  ageGroup?: "U18" | "U20" | "Senior" | "Masters";
   nationality?: string;
   federationId?: string;
   passportNumber?: string;
@@ -361,4 +365,55 @@ export interface SystemSettings {
   brandPrimaryColor: string;
   brandSecondaryColor: string;
 }
+
+export interface CompetitionSnapshot extends Omit<BaseMetadata, "athleteId"> {
+  id?: string;
+  name: string;
+  date: Timestamp;
+  venue: string;
+  season: string;
+  isIndoor: boolean;
+  status: "upcoming" | "in_progress" | "completed" | "archived";
+  athletes: string[]; // List of athleteIds participating
+  results: {
+    athleteId: string;
+    eventId: string;
+    performance: number | string; 
+    wind?: number;
+    points?: number;
+    rank?: number;
+    notes?: string;
+  }[];
+  isOfficial: boolean; // Differentiates from casual training meets
+}
+
+export interface PerformanceTimelineLog extends BaseMetadata {
+  id?: string;
+  eventId: string;
+  performanceValue: number; // Base unit (e.g., ms for time, mm for distance) for math
+  formattedPerformance: string; // e.g., "10.39s", "6.85m"
+  date: Timestamp;
+  context: "training" | "competition" | "target";
+  dataSource: "manual_coach" | "manual_athlete" | "competition_result" | "csv_import" | "wearable" | "timing_system" | "gps" | "force_plate";
+  competitionId?: string; // Link to CompetitionSnapshot if applicable
+  venue?: string;
+  weather?: string;
+  wind?: number;
+  season: string;
+  waPoints?: number; // World Athletics points if applicable
+  isPB?: boolean;
+  isSB?: boolean;
+}
+
+export interface SystemAuditLog extends BaseMetadata {
+  id?: string;
+  actorId: string; // The user who performed the action
+  actorRole: string; // Their role at the time
+  action: string; // e.g., "CHANGED_CATEGORY", "UPDATED_TARGET"
+  targetId: string; // The entity changed
+  targetType: "athlete" | "competition" | "performance" | "kpi" | "organization";
+  details: any; // JSON object representing the change (before/after)
+  ipAddress?: string;
+}
+
 

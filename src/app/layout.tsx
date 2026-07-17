@@ -48,6 +48,9 @@ export const metadata: Metadata = {
   },
 };
 
+import { DeviceRestrictionOverlay } from "@/components/DeviceRestrictionOverlay";
+import { SmoothScrollProvider } from "@/components/SmoothScrollProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -59,9 +62,14 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
       <body className="min-h-full flex flex-col">
-        <Providers>
-          {children}
-        </Providers>
+        <DeviceRestrictionOverlay />
+        <div className="hidden lg:contents">
+          <SmoothScrollProvider>
+            <Providers>
+              {children}
+            </Providers>
+          </SmoothScrollProvider>
+        </div>
       </body>
     </html>
   );

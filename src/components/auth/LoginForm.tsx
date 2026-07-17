@@ -8,6 +8,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff, ShieldCheck, Database, Lock, Users } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -98,8 +99,8 @@ export function LoginForm() {
         className="flex flex-col items-center justify-center py-12"
       >
         <div className="relative">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.5)] z-10 relative">
-            <span className="text-white font-black text-2xl">H</span>
+          <div className="w-[114px] h-[114px] rounded-2xl flex items-center justify-center z-10 relative">
+            <Image src="/logo.png" alt="Heptafit Logo" width={114} height={114} className="w-[114px] h-[114px] object-contain drop-shadow-[0_0_15px_rgba(168,85,247,0.5)] animate-shimmer" />
           </div>
           <motion.div
             animate={{ rotate: 360 }}
@@ -126,9 +127,7 @@ export function LoginForm() {
       className="w-full"
     >
       <div className="mb-10 lg:hidden flex items-center gap-2">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg">
-          <span className="text-white font-bold text-sm">H</span>
-        </div>
+        <Image src="/logo.png" alt="Heptafit Logo" width={82} height={82} className="w-[82px] h-[82px] object-contain animate-shimmer" />
         <span className="font-bold text-xl tracking-tight text-foreground">Heptafit</span>
       </div>
 

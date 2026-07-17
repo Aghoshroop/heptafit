@@ -50,7 +50,11 @@ export function useCoachData() {
     where("coachId", "==", coachId)
   ], isReady);
 
-  const loading = !isReady || relLoading || athletesLoading || insightsLoading || wellnessLoading || schedulesLoading || plansLoading;
+  const { data: groups, loading: groupsLoading } = useRealtimeData("groups", [
+    where("organizationId", "==", orgId)
+  ], isReady);
+
+  const loading = !isReady || relLoading || athletesLoading || insightsLoading || wellnessLoading || schedulesLoading || plansLoading || groupsLoading;
 
   return {
     athletes,
@@ -59,6 +63,7 @@ export function useCoachData() {
     wellness,
     schedules,
     trainingPlans,
+    groups,
     loading,
     orgId,
     coachId
