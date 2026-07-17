@@ -119,7 +119,7 @@ export function ScheduleSessionDialog({ isOpen, onClose }: ScheduleSessionDialog
 
         <div className="pt-4 flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-          <Button type="submit" disabled={loading} className="bg-blue-500 hover:bg-blue-600 text-white">
+          <Button type="submit" disabled={loading} className="bg-blue-500 hover:bg-blue-600 text-foreground">
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Schedule
           </Button>

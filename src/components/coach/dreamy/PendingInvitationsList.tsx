@@ -65,17 +65,17 @@ export function PendingInvitationsList() {
   };
 
   return (
-    <div className="bg-[#11141A] rounded-xl border border-[#1F2937] flex flex-col flex-1 min-h-0">
-      <div className="p-5 flex items-center justify-between border-b border-[#1F2937]">
-        <h3 className="text-sm font-semibold text-white">Pending Invitations</h3>
+    <div className="bg-card rounded-xl border border-border flex flex-col flex-1 min-h-0">
+      <div className="p-5 flex items-center justify-between border-b border-border">
+        <h3 className="text-sm font-semibold text-foreground">Pending Invitations</h3>
         <button className="text-[10px] text-[#8B5CF6] hover:text-[#7C3AED] transition-colors">
           View All
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto no-scrollbar p-5 space-y-4">
+      <div className="mt-4 p-5 space-y-4">
         {invites.length === 0 ? (
-          <div className="text-center text-xs text-[#6B7280] py-6">
+          <div className="text-center text-xs text-muted-foreground py-6">
             No pending invitations.
           </div>
         ) : (
@@ -91,16 +91,16 @@ export function PendingInvitationsList() {
               <div 
                 key={invite.id} 
                 onClick={() => handleOpenInvite(invite)}
-                className="flex items-center gap-3 group p-2 hover:bg-[#1F2937]/30 rounded-lg cursor-pointer transition-colors -mx-2"
+                className="flex items-center gap-3 group p-2 hover:bg-accent rounded-lg cursor-pointer transition-colors -mx-2"
               >
-                <div className="w-8 h-8 rounded-full bg-[#1F2937] border border-[#374151] flex items-center justify-center shrink-0 text-[10px] font-bold text-[#E5E7EB]">
+                <div className="w-8 h-8 rounded-full bg-secondary border border-border flex items-center justify-center shrink-0 text-[10px] font-bold text-foreground">
                   {initials}
                 </div>
                 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h4 className="text-xs font-semibold text-white truncate">{nameStr}</h4>
-                    <span className="text-[9px] text-[#9CA3AF] bg-[#1F2937] px-1.5 py-0.5 rounded border border-[#374151] truncate hidden xl:inline-block">
+                    <h4 className="text-xs font-semibold text-foreground truncate">{nameStr}</h4>
+                    <span className="text-[9px] text-muted-foreground bg-secondary px-1.5 py-0.5 rounded border border-border truncate hidden xl:inline-block">
                       {invite.groupName || "Unassigned"}
                     </span>
                   </div>
@@ -109,23 +109,23 @@ export function PendingInvitationsList() {
                       <span className="text-[10px] text-[#8B5CF6] truncate font-medium">{invite.category} • {invite.primaryEvent}</span>
                     )}
                     {!invite.category && (
-                      <p className="text-[10px] text-[#6B7280] truncate">{invite.email}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">{invite.email}</p>
                     )}
                   </div>
                 </div>
                 
                 <div className="flex items-center gap-3 shrink-0">
                   <span className="text-[9px] font-medium text-[#F59E0B] bg-[#F59E0B]/10 px-2 py-0.5 rounded">Pending</span>
-                  <span className="text-[9px] text-[#6B7280] hidden 2xl:inline-block">{timeStr}</span>
+                  <span className="text-[9px] text-muted-foreground hidden 2xl:inline-block">{timeStr}</span>
                   <button 
                     onClick={(e) => handleDelete(e, invite.id)}
-                    className="w-7 h-7 flex items-center justify-center rounded border border-[#374151] text-[#6B7280] hover:text-[#EF4444] hover:bg-[#EF4444]/10 hover:border-[#EF4444]/30 transition-colors opacity-0 group-hover:opacity-100"
+                    className="w-7 h-7 flex items-center justify-center rounded border border-border text-muted-foreground hover:text-[#EF4444] hover:bg-[#EF4444]/10 hover:border-[#EF4444]/30 transition-colors opacity-0 group-hover:opacity-100"
                     title="Revoke Invitation"
                   >
                     <Trash2 size={12} />
                   </button>
                   <button 
-                    className="w-7 h-7 flex items-center justify-center rounded border border-[#374151] text-[#8B5CF6] hover:text-white hover:bg-[#8B5CF6] transition-colors opacity-0 group-hover:opacity-100"
+                    className="w-7 h-7 flex items-center justify-center rounded border border-border text-[#8B5CF6] hover:text-foreground hover:bg-[#8B5CF6] transition-colors opacity-0 group-hover:opacity-100"
                     title="View Invitation Details"
                   >
                     <Link2 size={12} />
@@ -137,7 +137,7 @@ export function PendingInvitationsList() {
         )}
       </div>
 
-      <div className="p-4 border-t border-[#1F2937]">
+      <div className="p-4 border-t border-border">
         <button className="text-[10px] text-[#8B5CF6] hover:text-[#7C3AED] transition-colors">
           View All Invitations →
         </button>

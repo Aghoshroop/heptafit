@@ -44,22 +44,22 @@ export function DreamySystemPreferences() {
   };
 
   return (
-    <div className="bg-[#11141A] rounded-xl p-5 border border-[#1F2937] flex flex-col h-full">
-      <h3 className="text-sm font-semibold text-white mb-6">System Preferences</h3>
+    <div className="bg-card rounded-xl p-5 border border-border flex flex-col h-full">
+      <h3 className="text-sm font-semibold text-foreground mb-6">System Preferences</h3>
       
-      <div className="flex-1 overflow-y-auto no-scrollbar space-y-5">
+      <div className="mt-4 space-y-5">
         
         <div className="flex items-center justify-between">
           <div className="flex gap-3">
-            <Monitor size={16} className="text-[#9CA3AF] mt-0.5" />
+            <Monitor size={16} className="text-muted-foreground mt-0.5" />
             <div>
-              <h4 className="text-xs font-medium text-white">Dark Mode</h4>
-              <p className="text-[10px] text-[#6B7280]">Use dark theme across the platform</p>
+              <h4 className="text-xs font-medium text-foreground">Dark Mode</h4>
+              <p className="text-[10px] text-muted-foreground">Use dark theme across the platform</p>
             </div>
           </div>
           <div 
             onClick={() => setPrefs(p => ({ ...p, darkMode: !p.darkMode }))}
-            className={`w-8 h-4 rounded-full relative cursor-pointer transition-colors ${prefs.darkMode ? 'bg-[#8B5CF6]' : 'bg-[#374151]'}`}
+            className={`w-8 h-4 rounded-full relative cursor-pointer transition-colors ${prefs.darkMode ? 'bg-[#8B5CF6]' : 'bg-accent'}`}
           >
             <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-transform ${prefs.darkMode ? 'right-0.5' : 'left-0.5'}`}></div>
           </div>
@@ -67,15 +67,15 @@ export function DreamySystemPreferences() {
 
         <div className="flex items-center justify-between">
           <div className="flex gap-3">
-            <Layout size={16} className="text-[#9CA3AF] mt-0.5" />
+            <Layout size={16} className="text-muted-foreground mt-0.5" />
             <div>
-              <h4 className="text-xs font-medium text-white">Compact View</h4>
-              <p className="text-[10px] text-[#6B7280]">Show more content in less space</p>
+              <h4 className="text-xs font-medium text-foreground">Compact View</h4>
+              <p className="text-[10px] text-muted-foreground">Show more content in less space</p>
             </div>
           </div>
           <div 
             onClick={() => setPrefs(p => ({ ...p, compactView: !p.compactView }))}
-            className={`w-8 h-4 rounded-full relative cursor-pointer transition-colors ${prefs.compactView ? 'bg-[#8B5CF6]' : 'bg-[#374151]'}`}
+            className={`w-8 h-4 rounded-full relative cursor-pointer transition-colors ${prefs.compactView ? 'bg-[#8B5CF6]' : 'bg-accent'}`}
           >
             <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-transform ${prefs.compactView ? 'right-0.5' : 'left-0.5'}`}></div>
           </div>
@@ -83,16 +83,16 @@ export function DreamySystemPreferences() {
 
         <div className="flex items-center justify-between">
           <div className="flex gap-3">
-            <Scale size={16} className="text-[#9CA3AF] mt-0.5" />
+            <Scale size={16} className="text-muted-foreground mt-0.5" />
             <div>
-              <h4 className="text-xs font-medium text-white">Data Units</h4>
-              <p className="text-[10px] text-[#6B7280]">Choose your preferred measurement units</p>
+              <h4 className="text-xs font-medium text-foreground">Data Units</h4>
+              <p className="text-[10px] text-muted-foreground">Choose your preferred measurement units</p>
             </div>
           </div>
           <select 
             value={prefs.dataUnits}
             onChange={(e) => setPrefs(p => ({ ...p, dataUnits: e.target.value }))}
-            className="bg-transparent text-xs text-[#9CA3AF] border-none focus:outline-none cursor-pointer text-right appearance-none"
+            className="bg-transparent text-xs text-muted-foreground border-none focus:outline-none cursor-pointer text-right appearance-none"
           >
             <option>Metric (kg, cm)</option>
             <option>Imperial (lbs, in)</option>
@@ -101,16 +101,16 @@ export function DreamySystemPreferences() {
 
         <div className="flex items-center justify-between">
           <div className="flex gap-3">
-            <Calendar size={16} className="text-[#9CA3AF] mt-0.5" />
+            <Calendar size={16} className="text-muted-foreground mt-0.5" />
             <div>
-              <h4 className="text-xs font-medium text-white">Week Start Day</h4>
-              <p className="text-[10px] text-[#6B7280]">Choose the first day of the week</p>
+              <h4 className="text-xs font-medium text-foreground">Week Start Day</h4>
+              <p className="text-[10px] text-muted-foreground">Choose the first day of the week</p>
             </div>
           </div>
           <select 
             value={prefs.weekStart}
             onChange={(e) => setPrefs(p => ({ ...p, weekStart: e.target.value }))}
-            className="bg-transparent text-xs text-[#9CA3AF] border-none focus:outline-none cursor-pointer text-right appearance-none"
+            className="bg-transparent text-xs text-muted-foreground border-none focus:outline-none cursor-pointer text-right appearance-none"
           >
             <option>Monday</option>
             <option>Sunday</option>
@@ -119,16 +119,16 @@ export function DreamySystemPreferences() {
 
         <div className="flex items-center justify-between">
           <div className="flex gap-3">
-            <Globe size={16} className="text-[#9CA3AF] mt-0.5" />
+            <Globe size={16} className="text-muted-foreground mt-0.5" />
             <div>
-              <h4 className="text-xs font-medium text-white">Language</h4>
-              <p className="text-[10px] text-[#6B7280]">Select your preferred language</p>
+              <h4 className="text-xs font-medium text-foreground">Language</h4>
+              <p className="text-[10px] text-muted-foreground">Select your preferred language</p>
             </div>
           </div>
           <select 
             value={prefs.language}
             onChange={(e) => setPrefs(p => ({ ...p, language: e.target.value }))}
-            className="bg-transparent text-xs text-[#9CA3AF] border-none focus:outline-none cursor-pointer text-right appearance-none"
+            className="bg-transparent text-xs text-muted-foreground border-none focus:outline-none cursor-pointer text-right appearance-none"
           >
             <option>English</option>
             <option>Spanish</option>
@@ -141,7 +141,7 @@ export function DreamySystemPreferences() {
       <button 
         onClick={handleSave}
         disabled={saving}
-        className="w-full mt-6 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg py-2 text-xs font-medium transition-colors shadow-lg shadow-indigo-500/20 disabled:opacity-50"
+        className="w-full mt-6 bg-[#8B5CF6] hover:bg-[#7C3AED] text-foreground rounded-lg py-2 text-xs font-medium transition-colors shadow-lg shadow-indigo-500/20 disabled:opacity-50"
       >
         {saving ? "Saving..." : "Save Preferences"}
       </button>

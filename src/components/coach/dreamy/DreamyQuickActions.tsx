@@ -27,9 +27,9 @@ export function DreamyQuickActions() {
           <button 
             key={i}
             onClick={() => { console.log(`Triggered ${action.name}`); setIsOpen(false); }}
-            className="flex items-center gap-3 bg-[#11141A] border border-[#1F2937] rounded-xl px-4 py-3 hover:bg-[#1F2937]/80 transition-colors shadow-lg shadow-black/50 group"
+            className="flex items-center gap-3 bg-card border border-border rounded-xl px-4 py-3 hover:bg-accent transition-colors shadow-lg shadow-black/50 group"
           >
-            <span className="text-sm font-medium text-[#E2E8F0] group-hover:text-white transition-colors">{action.name}</span>
+            <span className="text-sm font-medium text-foreground transition-colors">{action.name}</span>
             <div className={`w-8 h-8 rounded-lg ${action.bg} flex items-center justify-center shrink-0`}>
               <action.icon size={16} className={action.color} />
             </div>

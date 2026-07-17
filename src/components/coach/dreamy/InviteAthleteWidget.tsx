@@ -107,14 +107,14 @@ export function InviteAthleteWidget() {
     }
   };
   return (
-    <div className="bg-[#11141A] rounded-xl p-6 border border-[#1F2937] flex flex-col">
-      <h3 className="text-base font-semibold text-white">Invite New Athlete</h3>
-      <p className="text-xs text-[#9CA3AF] mt-1 mb-6">Send an invitation to add a classified athlete to your team.</p>
+    <div className="bg-card rounded-xl p-6 border border-border flex flex-col">
+      <h3 className="text-base font-semibold text-foreground">Invite New Athlete</h3>
+      <p className="text-xs text-muted-foreground mt-1 mb-6">Send an invitation to add a classified athlete to your team.</p>
 
       <div className="space-y-4">
         {/* Visual Category Selector */}
         <div>
-          <label className="block text-[10px] font-medium text-[#E5E7EB] mb-2">Choose Athlete Category</label>
+          <label className="block text-[10px] font-medium text-foreground mb-2">Choose Athlete Category</label>
           <div className="grid grid-cols-3 gap-2">
             {VISUAL_CATEGORIES.map(c => (
               <button
@@ -123,8 +123,8 @@ export function InviteAthleteWidget() {
                 onClick={() => { setCategory(c.id); setPrimaryEvent(""); }}
                 className={`flex flex-col items-center justify-center p-2 rounded-lg border transition-all ${
                   category === c.id 
-                    ? 'bg-[#8B5CF6]/20 border-[#8B5CF6] text-white shadow-[0_0_15px_rgba(139,92,246,0.15)]' 
-                    : 'bg-[#0A0C10] border-[#374151] text-[#9CA3AF] hover:border-[#4B5563]'
+                    ? 'bg-[#8B5CF6]/20 border-[#8B5CF6] text-foreground shadow-[0_0_15px_rgba(139,92,246,0.15)]' 
+                    : 'bg-background border-border text-muted-foreground hover:border-[#4B5563]'
                 }`}
               >
                 <span className="text-lg mb-1">{c.icon}</span>
@@ -137,16 +137,16 @@ export function InviteAthleteWidget() {
         {/* Dynamic Primary Event Dropdown */}
         {category && (
           <div className="animate-in fade-in slide-in-from-top-2 duration-200">
-            <label className="block text-[10px] font-medium text-[#E5E7EB] mb-1.5">Primary Event</label>
+            <label className="block text-[10px] font-medium text-foreground mb-1.5">Primary Event</label>
             <div className="relative">
               <select 
                 value={primaryEvent}
                 onChange={(e) => setPrimaryEvent(e.target.value)}
-                className="w-full bg-[#0A0C10] border border-[#8B5CF6]/50 rounded-lg pl-3 pr-8 py-2.5 text-xs text-white appearance-none focus:outline-none focus:border-[#8B5CF6] focus:ring-1 focus:ring-[#8B5CF6] transition-all cursor-pointer shadow-[0_0_10px_rgba(139,92,246,0.1)]"
+                className="w-full bg-background border border-[#8B5CF6]/50 rounded-lg pl-3 pr-8 py-2.5 text-xs text-foreground appearance-none focus:outline-none focus:border-[#8B5CF6] focus:ring-1 focus:ring-[#8B5CF6] transition-all cursor-pointer shadow-[0_0_10px_rgba(139,92,246,0.1)]"
               >
                 <option value="">Select Primary Event</option>
                 {events.map((e: any) => (
-                  <option key={e.id} value={e.id} className="text-white hover:bg-[#374151]">{(e as any).name}</option>
+                  <option key={e.id} value={e.id} className="text-foreground hover:bg-accent">{(e as any).name}</option>
                 ))}
               </select>
               <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8B5CF6] pointer-events-none" />
@@ -155,37 +155,37 @@ export function InviteAthleteWidget() {
         )}
 
         <div>
-          <label className="block text-[10px] font-medium text-[#E5E7EB] mb-1.5 mt-2">Athlete Name (Optional)</label>
+          <label className="block text-[10px] font-medium text-foreground mb-1.5 mt-2">Athlete Name (Optional)</label>
           <input 
             type="text" 
             value={athleteName}
             onChange={(e) => setAthleteName(e.target.value)}
             placeholder="Enter athlete name for reference" 
-            className="w-full bg-[#0A0C10] border border-[#374151] rounded-lg px-3 py-2.5 text-xs text-white placeholder:text-[#6B7280] focus:outline-none focus:border-[#8B5CF6] focus:ring-1 focus:ring-[#8B5CF6] transition-all"
+            className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#8B5CF6] focus:ring-1 focus:ring-[#8B5CF6] transition-all"
           />
         </div>
 
         <div>
-          <label className="block text-[10px] font-medium text-[#E5E7EB] mb-1.5">Select Group (Optional)</label>
+          <label className="block text-[10px] font-medium text-foreground mb-1.5">Select Group (Optional)</label>
           <div className="relative">
             <select 
               value={selectedGroupId}
               onChange={(e) => setSelectedGroupId(e.target.value)}
-              className="w-full bg-[#0A0C10] border border-[#374151] rounded-lg pl-3 pr-8 py-2.5 text-xs text-[#9CA3AF] appearance-none focus:outline-none focus:border-[#8B5CF6] focus:ring-1 focus:ring-[#8B5CF6] transition-all cursor-pointer"
+              className="w-full bg-background border border-border rounded-lg pl-3 pr-8 py-2.5 text-xs text-muted-foreground appearance-none focus:outline-none focus:border-[#8B5CF6] focus:ring-1 focus:ring-[#8B5CF6] transition-all cursor-pointer"
             >
               <option value="">Choose a training group</option>
               {groups.map((g: any) => (
                 <option key={g.id} value={g.id}>{g.name}</option>
               ))}
             </select>
-            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] pointer-events-none" />
+            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           </div>
         </div>
 
           <button 
             onClick={handleSendInvite}
             disabled={loading || !category || !primaryEvent}
-            className="w-full bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] hover:from-[#7C3AED] hover:to-[#6D28D9] disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg py-3 text-xs font-bold transition-all shadow-lg shadow-[#8B5CF6]/25 flex items-center justify-center gap-2 mt-4"
+            className="w-full bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] hover:from-[#7C3AED] hover:to-[#6D28D9] disabled:opacity-50 disabled:cursor-not-allowed text-foreground rounded-lg py-3 text-xs font-bold transition-all shadow-lg shadow-[#8B5CF6]/25 flex items-center justify-center gap-2 mt-4"
           >
             {loading ? "Generating Invite..." : "Generate Invite"}
           </button>

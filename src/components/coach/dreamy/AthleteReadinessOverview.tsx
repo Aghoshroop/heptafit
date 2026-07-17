@@ -10,7 +10,11 @@ export function AthleteReadinessOverview() {
   const data = useMemo(() => {
     const counts = { "Ready": 0, "Moderate": 0, "Fatigued": 0, "At Risk": 0 };
     athletes.forEach((a: any) => {
-      if (a.readiness in counts) counts[a.readiness as keyof typeof counts]++;
+      const r = a.readiness || 0;
+      if (r < 40) counts["At Risk"]++;
+      else if (r < 70) counts["Fatigued"]++;
+      else if (r < 85) counts["Moderate"]++;
+      else counts["Ready"]++;
     });
 
     return [
@@ -24,8 +28,8 @@ export function AthleteReadinessOverview() {
   const total = athletes.length;
 
   return (
-    <div className="bg-[#11141A] rounded-xl p-5 border border-[#1F2937] flex flex-col h-[220px]">
-      <h3 className="text-sm font-semibold text-white mb-4">Athlete Readiness Overview</h3>
+    <div className="bg-card rounded-xl p-5 border border-border flex flex-col h-[220px]">
+      <h3 className="text-sm font-semibold text-foreground mb-4">Athlete Readiness Overview</h3>
       
       <div className="flex-1 flex items-center justify-between">
         <div className="w-[120px] h-[120px] relative shrink-0">
@@ -48,8 +52,8 @@ export function AthleteReadinessOverview() {
             </PieChart>
           </ResponsiveContainer>
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span className="text-2xl font-bold text-white">{total}</span>
-            <span className="text-[9px] text-[#9CA3AF]">Athletes</span>
+            <span className="text-2xl font-bold text-foreground">{total}</span>
+            <span className="text-[9px] text-muted-foreground">Athletes</span>
           </div>
         </div>
 
@@ -58,11 +62,11 @@ export function AthleteReadinessOverview() {
             <div key={i} className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-sm" style={{ backgroundColor: item.color }} />
-                <span className="text-[#E5E7EB]">{item.name}</span>
+                <span className="text-foreground">{item.name}</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-white font-medium">{item.value}</span>
-                <span className="text-[#6B7280] text-[10px] w-8 text-right">({total > 0 ? Math.round((item.value / total) * 100) : 0}%)</span>
+                <span className="text-foreground font-medium">{item.value}</span>
+                <span className="text-muted-foreground text-[10px] w-8 text-right">({total > 0 ? Math.round((item.value / total) * 100) : 0}%)</span>
               </div>
             </div>
           ))}

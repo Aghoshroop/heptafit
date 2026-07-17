@@ -54,17 +54,17 @@ export function InvitationCreatedModal({ isOpen, onClose, data }: InvitationCrea
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 20 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="bg-[#0A0C10] border border-[#1F2937] rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col pointer-events-auto"
+              className="bg-background border border-border rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col pointer-events-auto"
             >
               {/* Header */}
-              <div className="p-5 border-b border-[#1F2937] flex items-center justify-between bg-[#11141A]">
+              <div className="p-5 border-b border-border flex items-center justify-between bg-card">
                 <div>
-                  <h2 className="text-lg font-bold text-white">Invitation Created</h2>
-                  <p className="text-xs text-[#9CA3AF] mt-0.5">Share this invite with your athlete</p>
+                  <h2 className="text-lg font-bold text-foreground">Invitation Created</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">Share this invite with your athlete</p>
                 </div>
                 <button
                   onClick={onClose}
-                  className="w-8 h-8 rounded-full bg-[#1F2937] hover:bg-[#374151] flex items-center justify-center text-[#9CA3AF] hover:text-white transition-colors"
+                  className="w-8 h-8 rounded-full bg-secondary hover:bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <X size={16} />
                 </button>
@@ -85,24 +85,24 @@ export function InvitationCreatedModal({ isOpen, onClose, data }: InvitationCrea
 
                   {/* Code & Details */}
                   <div className="flex-1 w-full flex flex-col gap-4">
-                    <div className="bg-[#1F2937]/50 border border-[#374151] rounded-xl p-4 flex flex-col items-center justify-center relative cursor-pointer hover:bg-[#1F2937] transition-colors" onClick={handleCopyCode}>
-                      <span className="text-[10px] text-[#9CA3AF] font-medium uppercase tracking-wider absolute top-2 left-3">Invite Code</span>
-                      <span className="text-3xl font-mono font-bold tracking-[0.2em] text-white mt-4">
+                    <div className="bg-muted border border-border rounded-xl p-4 flex flex-col items-center justify-center relative cursor-pointer hover:bg-accent transition-colors" onClick={handleCopyCode}>
+                      <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider absolute top-2 left-3">Invite Code</span>
+                      <span className="text-3xl font-mono font-bold tracking-[0.2em] text-foreground mt-4">
                         {data.invitationCode}
                       </span>
                     </div>
 
-                    <div className="bg-[#11141A] border border-[#1F2937] rounded-xl p-3 flex flex-col gap-2">
+                    <div className="bg-card border border-border rounded-xl p-3 flex flex-col gap-2">
                       <div className="flex justify-between items-center text-xs">
-                        <span className="text-[#6B7280]">Athlete</span>
-                        <span className="font-semibold text-[#E5E7EB]">{data.athleteName || 'Unnamed Athlete'}</span>
+                        <span className="text-muted-foreground">Athlete</span>
+                        <span className="font-semibold text-foreground">{data.athleteName || 'Unnamed Athlete'}</span>
                       </div>
                       <div className="flex justify-between items-center text-xs">
-                        <span className="text-[#6B7280]">Group</span>
-                        <span className="font-medium text-[#E5E7EB]">{data.groupName}</span>
+                        <span className="text-muted-foreground">Group</span>
+                        <span className="font-medium text-foreground">{data.groupName}</span>
                       </div>
                       <div className="flex justify-between items-center text-xs">
-                        <span className="text-[#6B7280]">Classification</span>
+                        <span className="text-muted-foreground">Classification</span>
                         <span className="font-medium text-[#8B5CF6]">{data.category} / {data.primaryEvent}</span>
                       </div>
                     </div>
@@ -121,7 +121,7 @@ export function InvitationCreatedModal({ isOpen, onClose, data }: InvitationCrea
                     className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-300 ${
                       copied 
                         ? 'bg-[#34D399]/20 text-[#34D399] border border-[#34D399]/30' 
-                        : 'bg-[#8B5CF6] text-white hover:bg-[#7C3AED] shadow-[0_0_20px_rgba(139,92,246,0.3)]'
+                        : 'bg-[#8B5CF6] text-foreground hover:bg-[#7C3AED] shadow-[0_0_20px_rgba(139,92,246,0.3)]'
                     }`}
                   >
                     <Copy size={16} /> {copied ? 'Link Copied!' : 'Copy Invite Link'}

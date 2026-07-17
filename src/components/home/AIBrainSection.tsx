@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Brain } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -11,6 +12,8 @@ const Spline = dynamic(() => import("@splinetool/react-spline"), {
 });
 
 export function AIBrainSection() {
+  const [loadSpline, setLoadSpline] = useState(false);
+
   return (
     <section className="py-32 bg-black relative border-y border-white/10 overflow-hidden">
       {/* Ambient Radial Glow */}
@@ -82,12 +85,20 @@ export function AIBrainSection() {
         </div>
 
         {/* 3D Brain Spline Model */}
-        <div className="relative w-full h-[500px] lg:h-[700px] translate-x-[30px] flex items-center justify-center pointer-events-none">
-          <Spline 
-            scene="https://prod.spline.design/d-pfYZIDPDAHVFUE/scene.splinecode" 
-            className="w-full h-full"
-          />
-        </div>
+        <motion.div 
+          onViewportEnter={() => setLoadSpline(true)}
+          viewport={{ once: true, margin: "200px" }}
+          className="relative w-full h-[500px] lg:h-[700px] translate-x-[30px] flex items-center justify-center pointer-events-none"
+        >
+          {loadSpline ? (
+            <Spline 
+              scene="https://prod.spline.design/d-pfYZIDPDAHVFUE/scene.splinecode" 
+              className="w-full h-full"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-primary/50 text-sm tracking-widest uppercase">Initializing AI Engine...</div>
+          )}
+        </motion.div>
       </div>
     </section>
   );

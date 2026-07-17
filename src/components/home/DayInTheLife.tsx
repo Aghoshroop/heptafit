@@ -15,8 +15,8 @@ export function DayInTheLife() {
   return (
     <section className="py-32 bg-black relative overflow-hidden">
       {/* Ambient Radial Glows */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[radial-gradient(circle,rgba(6,182,212,0.1)_0%,transparent_70%)] pointer-events-none " />
-      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[radial-gradient(circle,rgba(168,85,247,0.1)_0%,transparent_70%)] pointer-events-none " />
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[radial-gradient(circle,rgba(6,182,212,0.1)_0%,transparent_70%)] pointer-events-none transform-gpu" />
+      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[radial-gradient(circle,rgba(168,85,247,0.1)_0%,transparent_70%)] pointer-events-none transform-gpu" />
 
       <div className="max-w-3xl mx-auto px-4 relative z-10">
         <div className="text-center mb-20">
@@ -33,13 +33,14 @@ export function DayInTheLife() {
               <motion.div 
                 key={i}
                 initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.6, delay: i * 0.1 }}
-                className={`will-change-transform relative flex flex-col md:flex-row items-center justify-between group ${i % 2 === 0 ? "md:flex-row-reverse" : ""}`}
+                className={`relative flex flex-col md:flex-row items-center justify-between group ${i % 2 === 0 ? "md:flex-row-reverse" : ""}`}
               >
                 {/* Timeline Dot */}
                 <div className="absolute left-[-2.5rem] md:left-1/2 w-8 h-8 rounded-full bg-black border-4 border-primary -translate-x-1/2 flex items-center justify-center z-10  group-hover:scale-125 transition-transform duration-300">
-                  <div className="w-2 h-2 rounded-full bg-primary animate-ping"></div>
+                  <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(168,85,247,0.8)]"></div>
                 </div>
 
                 <motion.div 
@@ -61,7 +62,8 @@ export function DayInTheLife() {
 
         <motion.div 
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: "-50px" }}
           className="mt-20 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-6 text-center  "
         >
           <div className="flex items-center justify-center gap-2 text-emerald-400 font-bold text-lg mb-2 ">

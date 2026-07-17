@@ -43,22 +43,22 @@ export function AthleteOverviewTable() {
       case "Moderate": return "text-[#3B82F6]";
       case "Fatigued": return "text-[#F59E0B]";
       case "At Risk": return "text-[#EF4444]";
-      default: return "text-[#9CA3AF]";
+      default: return "text-muted-foreground";
     }
   };
 
   return (
-    <div className="bg-[#11141A] rounded-xl p-5 border border-[#1F2937] flex-1 flex flex-col min-h-0">
+    <div className="bg-card rounded-xl p-5 border border-border flex flex-col">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-white">Athlete Overview</h3>
+        <h3 className="text-sm font-semibold text-foreground">Athlete Overview</h3>
         <button className="text-[10px] text-[#8B5CF6] hover:text-[#7C3AED] transition-colors">
           View All Athletes
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto no-scrollbar">
+      <div className="mt-4">
         <table className="w-full text-xs text-left">
-          <thead className="text-[10px] text-[#6B7280] uppercase tracking-wider">
+          <thead className="text-[10px] text-muted-foreground uppercase tracking-wider">
             <tr>
               <th className="pb-3 font-semibold">Athlete</th>
               <th className="pb-3 font-semibold">Event</th>
@@ -70,11 +70,11 @@ export function AthleteOverviewTable() {
           <tbody className="divide-y divide-[#1F2937]">
             {loading ? (
               <tr>
-                <td colSpan={5} className="py-8 text-center text-[#6B7280]">Loading athletes...</td>
+                <td colSpan={5} className="py-8 text-center text-muted-foreground">Loading athletes...</td>
               </tr>
             ) : displayAthletes.length === 0 ? (
               <tr>
-                <td colSpan={5} className="py-8 text-center text-[#6B7280]">No athletes found in organization.</td>
+                <td colSpan={5} className="py-8 text-center text-muted-foreground">No athletes found in organization.</td>
               </tr>
             ) : displayAthletes.map((athlete) => {
               const name = `${athlete.firstName || ''} ${athlete.lastName || ''}`.trim() || 'Unknown Athlete';
@@ -82,25 +82,25 @@ export function AthleteOverviewTable() {
               const trend = getTrendData(athlete.uid);
 
               return (
-              <tr key={athlete.uid} className="group hover:bg-[#1F2937]/30 transition-colors">
+              <tr key={athlete.uid} className="group hover:bg-accent transition-colors">
                 <td className="py-2.5">
                   <div className="flex items-center gap-3">
                     <img 
-                      src={athlete.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1F2937&color=fff`} 
+                      src={athlete.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff`} 
                       className="w-7 h-7 rounded-full object-cover" 
                       alt={name} 
                     />
                     <div className="flex flex-col">
-                      <span className="text-white font-medium">{name}</span>
-                      <span className="text-[9px] text-[#6B7280]">{eventGroup}</span>
+                      <span className="text-foreground font-medium">{name}</span>
+                      <span className="text-[9px] text-muted-foreground">{eventGroup}</span>
                     </div>
                   </div>
                 </td>
-                <td className="py-2.5 text-[#9CA3AF]">{eventGroup}</td>
+                <td className="py-2.5 text-muted-foreground">{eventGroup}</td>
                 <td className="py-2.5">
                   <div className="flex flex-col">
-                    <span className="text-white">{athlete.status || "Unknown"}</span>
-                    <span className="text-[9px] text-[#6B7280]">Last Active: {athlete.lastActive}</span>
+                    <span className="text-foreground">{athlete.status || "Unknown"}</span>
+                    <span className="text-[9px] text-muted-foreground">Last Active: {athlete.lastActive}</span>
                   </div>
                 </td>
                 <td className="py-2.5">
@@ -133,7 +133,7 @@ export function AthleteOverviewTable() {
         </table>
       </div>
 
-      <div className="mt-3 pt-3 border-t border-[#1F2937]">
+      <div className="mt-3 pt-3 border-t border-border">
         <button className="text-[10px] text-[#8B5CF6] hover:text-[#7C3AED] transition-colors">
           View all athletes →
         </button>

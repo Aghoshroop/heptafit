@@ -12,6 +12,7 @@ import {
   ClipboardList, MessageSquare, FolderOpen, Mail, Settings
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -114,7 +115,7 @@ export function StudentAppLayout({ children }: { children: React.ReactNode }) {
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200 group relative z-10 ${
                     isActive 
                       ? "text-emerald-500 font-medium" 
-                      : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
                   }`}
                 >
                   <Icon size={18} strokeWidth={isActive ? 2.5 : 2} className={isActive ? "text-emerald-500" : "text-muted-foreground group-hover:text-foreground transition-colors"} />
@@ -127,7 +128,7 @@ export function StudentAppLayout({ children }: { children: React.ReactNode }) {
 
         <div className="p-4 mt-auto">
           <div className="glass-card rounded-2xl p-1 shadow-2xl">
-            <Link href="/athlete/profile" className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer group">
+            <Link href="/athlete/profile" className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-accent transition-colors cursor-pointer group">
               <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500 p-[2px]">
                 <div className="w-full h-full bg-card rounded-full flex items-center justify-center text-sm font-bold">
                   {userData?.firstName?.[0] || "A"}{userData?.lastName?.[0]}
@@ -146,7 +147,7 @@ export function StudentAppLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       <main className="flex-1 flex flex-col min-h-screen relative z-10 min-w-0">
-        <header className="h-20 lg:h-24 px-4 lg:px-8 flex items-center justify-between sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-white/5">
+        <header className="h-20 lg:h-24 px-4 lg:px-8 flex items-center justify-between sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setIsSidebarOpen(true)}>
               <Menu size={20} />
@@ -155,18 +156,19 @@ export function StudentAppLayout({ children }: { children: React.ReactNode }) {
           </div>
           
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <div className="relative group">
-              <Button variant="ghost" size="icon" className="relative rounded-full glass hover:bg-white/10 transition-colors w-10 h-10">
+              <Button variant="ghost" size="icon" className="relative rounded-full glass hover:bg-accent transition-colors w-10 h-10">
                 <Bell size={18} className="text-muted-foreground group-hover:text-foreground" />
                 {notifications.some(n => !n.isRead) && (
                   <span className="absolute top-2 right-2 w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_10px_var(--color-emerald-500)]" />
                 )}
               </Button>
               <div className="absolute right-0 mt-2 w-80 glass-card rounded-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 p-4 transform translate-y-2 group-hover:translate-y-0">
-                <h3 className="text-sm font-semibold mb-3 border-b border-white/10 pb-2 text-foreground">Notifications</h3>
+                <h3 className="text-sm font-semibold mb-3 border-b border-border pb-2 text-foreground">Notifications</h3>
                 <div className="space-y-2 max-h-80 overflow-y-auto no-scrollbar">
                   {notifications.length > 0 ? notifications.map(notif => (
-                    <div key={notif.id} className={`text-sm p-3 rounded-xl transition-colors ${notif.isRead ? 'hover:bg-white/5' : 'bg-emerald-500/10 border border-emerald-500/20'}`}>
+                    <div key={notif.id} className={`text-sm p-3 rounded-xl transition-colors ${notif.isRead ? 'hover:bg-accent' : 'bg-emerald-500/10 border border-emerald-500/20'}`}>
                       <p className="font-medium text-foreground">{notif.title}</p>
                       <p className="text-xs text-muted-foreground mt-1">{notif.message}</p>
                     </div>

@@ -11,23 +11,23 @@ export function DreamySettingsQuickActions() {
   ];
 
   return (
-    <div className="bg-[#11141A] rounded-xl border border-[#1F2937] flex flex-col h-full">
+    <div className="bg-card rounded-xl border border-border flex flex-col h-full">
       <div className="p-5">
-        <h3 className="text-sm font-semibold text-white mb-4">Quick Actions</h3>
+        <h3 className="text-sm font-semibold text-foreground mb-4">Quick Actions</h3>
         
         <div className="space-y-2">
           {actions.map((action, i) => (
-            <div key={i} className="flex items-center justify-between p-2 rounded-lg hover:bg-[#1F2937]/50 cursor-pointer transition-colors group">
+            <div key={i} className="flex items-center justify-between p-2 rounded-lg hover:bg-accent cursor-pointer transition-colors group">
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 rounded flex items-center justify-center shrink-0 ${action.bg}`}>
                   <action.icon size={14} className={action.color} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-semibold text-white">{action.name}</h4>
-                  <p className="text-[10px] text-[#6B7280]">{action.desc}</p>
+                  <h4 className="text-xs font-semibold text-foreground">{action.name}</h4>
+                  <p className="text-[10px] text-muted-foreground">{action.desc}</p>
                 </div>
               </div>
-              <ChevronRight size={14} className="text-[#6B7280] group-hover:text-white transition-colors" />
+              <ChevronRight size={14} className="text-muted-foreground group-hover:text-foreground transition-colors" />
             </div>
           ))}
         </div>

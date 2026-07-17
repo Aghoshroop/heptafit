@@ -57,34 +57,34 @@ export function TodaysScheduleTimeline() {
   }, [schedules]);
 
   return (
-    <div className="bg-[#11141A] rounded-xl p-5 border border-[#1F2937] flex flex-col h-[320px]">
+    <div className="bg-card rounded-xl p-5 border border-border flex flex-col h-[320px]">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-sm font-semibold text-white">Today's Schedule</h3>
+        <h3 className="text-sm font-semibold text-foreground">Today's Schedule</h3>
         <button className="text-[10px] text-[#8B5CF6] hover:text-[#7C3AED] transition-colors">
           View Calendar
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto no-scrollbar relative pl-3">
+      <div className="mt-4 relative pl-3">
         {/* Timeline line */}
-        <div className="absolute left-[19px] top-2 bottom-2 w-px bg-[#1F2937]" />
+        <div className="absolute left-[19px] top-2 bottom-2 w-px bg-secondary" />
 
         <div className="space-y-6">
           {sessions.length === 0 ? (
-            <div className="text-center text-[#6B7280] text-xs py-10">No sessions scheduled for today.</div>
+            <div className="text-center text-muted-foreground text-xs py-10">No sessions scheduled for today.</div>
           ) : (
             sessions.map((session, i) => (
               <div key={i} className="flex gap-4 relative">
-                <div className="w-14 text-[10px] font-medium text-[#9CA3AF] shrink-0 pt-0.5">
+                <div className="w-14 text-[10px] font-medium text-muted-foreground shrink-0 pt-0.5">
                   {session.time}
                 </div>
                 
                 <div className={`w-2 h-2 rounded-full ${session.dotColor} absolute left-[15px] top-1.5 shadow-[0_0_8px_var(--tw-shadow-color)] shadow-${session.dotColor.split('-')[1]}`} />
                 
-                <div className="flex-1 flex items-start justify-between bg-[#1F2937]/30 rounded-lg p-3 ml-2 border border-[#1F2937]/50 hover:bg-[#1F2937]/50 transition-colors cursor-pointer">
+                <div className="flex-1 flex items-start justify-between bg-muted/50 rounded-lg p-3 ml-2 border border-border/50 hover:bg-accent transition-colors cursor-pointer">
                   <div>
-                    <h4 className="text-xs font-semibold text-white mb-0.5">{session.title}</h4>
-                    <p className="text-[10px] text-[#6B7280]">{session.attendees}</p>
+                    <h4 className="text-xs font-semibold text-foreground mb-0.5">{session.title}</h4>
+                    <p className="text-[10px] text-muted-foreground">{session.attendees}</p>
                   </div>
                   <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${session.tagColor}`}>
                     {session.tag}
@@ -96,8 +96,8 @@ export function TodaysScheduleTimeline() {
         </div>
       </div>
 
-      <div className="mt-4 pt-4 border-t border-[#1F2937]">
-        <button className="text-xs text-[#9CA3AF] hover:text-white transition-colors flex items-center gap-1">
+      <div className="mt-4 pt-4 border-t border-border">
+        <button className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
           <span className="text-[#8B5CF6]">+</span> Add Session
         </button>
       </div>

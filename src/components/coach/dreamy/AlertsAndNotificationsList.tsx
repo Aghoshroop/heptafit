@@ -48,17 +48,17 @@ export function AlertsAndNotificationsList() {
   }, [insights]);
 
   return (
-    <div className="bg-[#11141A] rounded-xl p-5 border border-[#1F2937] flex-1 flex flex-col min-h-0">
+    <div className="bg-card rounded-xl p-5 border border-border flex flex-col">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-white">Alerts & Notifications</h3>
+        <h3 className="text-sm font-semibold text-foreground">Alerts & Notifications</h3>
         <button className="text-[10px] text-[#8B5CF6] hover:text-[#7C3AED] transition-colors">
           View All
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto no-scrollbar space-y-4">
+      <div className="mt-4 space-y-4">
         {alerts.length === 0 ? (
-          <div className="text-center text-[#6B7280] text-xs py-6">No active alerts.</div>
+          <div className="text-center text-muted-foreground text-xs py-6">No active alerts.</div>
         ) : (
           alerts.map((alert, i) => (
             <div key={i} className="flex gap-3 items-start group cursor-pointer">
@@ -66,10 +66,10 @@ export function AlertsAndNotificationsList() {
                 <alert.icon size={14} className={alert.color} />
               </div>
               <div className="flex-1 min-w-0 pt-0.5">
-                <h4 className="text-xs font-semibold text-white truncate">{alert.title}</h4>
-                <p className="text-[10px] text-[#9CA3AF] mt-0.5 line-clamp-1">{alert.desc}</p>
+                <h4 className="text-xs font-semibold text-foreground truncate">{alert.title}</h4>
+                <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">{alert.desc}</p>
               </div>
-              <span className="text-[10px] text-[#6B7280] shrink-0 pt-0.5">{alert.time}</span>
+              <span className="text-[10px] text-muted-foreground shrink-0 pt-0.5">{alert.time}</span>
             </div>
           ))
         )}

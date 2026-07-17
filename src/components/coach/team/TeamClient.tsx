@@ -184,11 +184,11 @@ export function TeamClient() {
         </div>
         <div className="flex gap-2">
           {activeTab === "groups" ? (
-            <Button onClick={() => setIsGroupModalOpen(true)} className="bg-blue-500 hover:bg-blue-600 text-white rounded-full">
+            <Button onClick={() => setIsGroupModalOpen(true)} className="bg-blue-500 hover:bg-blue-600 text-foreground rounded-full">
               <Plus size={18} className="mr-2" /> Create Group
             </Button>
           ) : (
-            <Button onClick={() => { setInviteStatus("idle"); setIsInviteModalOpen(true); }} className="bg-blue-500 hover:bg-blue-600 text-white rounded-full">
+            <Button onClick={() => { setInviteStatus("idle"); setIsInviteModalOpen(true); }} className="bg-blue-500 hover:bg-blue-600 text-foreground rounded-full">
               <UserPlus size={18} className="mr-2" /> Assign Staff
             </Button>
           )}
@@ -409,7 +409,7 @@ export function TeamClient() {
                   </div>
                 )}
 
-                <Button type="submit" disabled={inviteStatus === "searching" || inviteStatus === "success"} className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-xl py-6 mt-4">
+                <Button type="submit" disabled={inviteStatus === "searching" || inviteStatus === "success"} className="w-full bg-blue-500 hover:bg-blue-600 text-foreground rounded-xl py-6 mt-4">
                   {inviteStatus === "searching" ? "Searching & Assigning..." : "Assign Staff"}
                 </Button>
               </form>
@@ -455,7 +455,7 @@ export function TeamClient() {
                     className="bg-background/50 border-white/10"
                   />
                 </div>
-                <Button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-xl py-6 mt-4">
+                <Button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-foreground rounded-xl py-6 mt-4">
                   Create Group
                 </Button>
               </form>

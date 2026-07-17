@@ -106,11 +106,11 @@ export function DreamyProfileSettings() {
   };
 
   return (
-    <div className="bg-[#11141A] rounded-xl p-5 border border-[#1F2937] flex h-full">
+    <div className="bg-card rounded-xl p-5 border border-border flex h-full">
       
       {/* Left side: Avatar */}
-      <div className="w-[200px] shrink-0 border-r border-[#1F2937] pr-5 flex flex-col items-center">
-        <h3 className="text-sm font-semibold text-white self-start mb-6">Profile Information</h3>
+      <div className="w-[200px] shrink-0 border-r border-border pr-5 flex flex-col items-center">
+        <h3 className="text-sm font-semibold text-foreground self-start mb-6">Profile Information</h3>
         
         <div className="relative mb-4">
           <input 
@@ -121,24 +121,24 @@ export function DreamyProfileSettings() {
             onChange={handleImageUpload}
           />
           <img 
-            src={userData?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.fullName || "Coach")}&background=1F2937&color=fff&size=128`} 
-            className="w-24 h-24 rounded-full border-2 border-[#1F2937] object-cover" 
+            src={userData?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.fullName || "Coach")}&background=random&color=fff&size=128`} 
+            className="w-24 h-24 rounded-full border-2 border-border object-cover" 
             alt="Profile"
           />
           <button 
             onClick={() => fileInputRef.current?.click()}
             disabled={uploadingImage}
-            className="absolute bottom-0 right-0 w-8 h-8 bg-[#8B5CF6] text-white rounded-full flex items-center justify-center border-2 border-[#11141A] hover:bg-[#7C3AED] transition-colors disabled:opacity-50"
+            className="absolute bottom-0 right-0 w-8 h-8 bg-[#8B5CF6] text-foreground rounded-full flex items-center justify-center border-2 border-background hover:bg-[#7C3AED] transition-colors disabled:opacity-50"
           >
             {uploadingImage ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
           </button>
         </div>
 
-        <h4 className="text-sm font-semibold text-white text-center">{formData.fullName || "Coach"}</h4>
+        <h4 className="text-sm font-semibold text-foreground text-center">{formData.fullName || "Coach"}</h4>
         <span className="text-[10px] font-medium text-[#8B5CF6] bg-[#8B5CF6]/10 px-2 py-0.5 rounded mt-1">{formData.role}</span>
-        <p className="text-[10px] text-[#9CA3AF] mt-3 text-center truncate w-full">{formData.email}</p>
-        <p className="text-[10px] text-[#9CA3AF] mt-1 text-center truncate w-full">{formData.phone || "No phone added"}</p>
-        <p className="text-[10px] text-[#9CA3AF] mt-1 text-center truncate w-full">{formData.location || "No location added"}</p>
+        <p className="text-[10px] text-muted-foreground mt-3 text-center truncate w-full">{formData.email}</p>
+        <p className="text-[10px] text-muted-foreground mt-1 text-center truncate w-full">{formData.phone || "No phone added"}</p>
+        <p className="text-[10px] text-muted-foreground mt-1 text-center truncate w-full">{formData.location || "No location added"}</p>
 
         <button className="mt-6 flex items-center justify-center gap-2 w-full py-2 rounded-lg border border-[#8B5CF6] text-[#8B5CF6] hover:bg-[#8B5CF6]/10 transition-colors text-xs font-medium">
           <Edit2 size={12} /> Edit Profile
@@ -149,52 +149,52 @@ export function DreamyProfileSettings() {
       <div className="flex-1 pl-5 flex flex-col">
         <div className="grid grid-cols-2 gap-4 flex-1">
           <div>
-            <label className="block text-[10px] font-medium text-[#9CA3AF] mb-1.5">Full Name</label>
+            <label className="block text-[10px] font-medium text-muted-foreground mb-1.5">Full Name</label>
             <input 
               type="text" 
               name="fullName"
               value={formData.fullName}
               onChange={handleChange}
-              className="w-full bg-transparent border border-[#374151] rounded-lg px-3 py-2 text-xs text-white placeholder:text-[#6B7280] focus:outline-none focus:border-[#8B5CF6] transition-colors"
+              className="w-full bg-transparent border border-border rounded-lg px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#8B5CF6] transition-colors"
             />
           </div>
           <div>
-            <label className="block text-[10px] font-medium text-[#9CA3AF] mb-1.5">Email Address</label>
+            <label className="block text-[10px] font-medium text-muted-foreground mb-1.5">Email Address</label>
             <input 
               type="email" 
               name="email"
               value={formData.email}
               disabled
-              className="w-full bg-[#1F2937]/30 border border-[#374151] rounded-lg px-3 py-2 text-xs text-[#9CA3AF] cursor-not-allowed focus:outline-none"
+              className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-xs text-muted-foreground cursor-not-allowed focus:outline-none"
             />
           </div>
           <div>
-            <label className="block text-[10px] font-medium text-[#9CA3AF] mb-1.5">Phone Number</label>
+            <label className="block text-[10px] font-medium text-muted-foreground mb-1.5">Phone Number</label>
             <input 
               type="text" 
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              className="w-full bg-transparent border border-[#374151] rounded-lg px-3 py-2 text-xs text-white placeholder:text-[#6B7280] focus:outline-none focus:border-[#8B5CF6] transition-colors"
+              className="w-full bg-transparent border border-border rounded-lg px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#8B5CF6] transition-colors"
             />
           </div>
           <div>
-            <label className="block text-[10px] font-medium text-[#9CA3AF] mb-1.5">Location</label>
+            <label className="block text-[10px] font-medium text-muted-foreground mb-1.5">Location</label>
             <input 
               type="text" 
               name="location"
               value={formData.location}
               onChange={handleChange}
-              className="w-full bg-transparent border border-[#374151] rounded-lg px-3 py-2 text-xs text-white placeholder:text-[#6B7280] focus:outline-none focus:border-[#8B5CF6] transition-colors"
+              className="w-full bg-transparent border border-border rounded-lg px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#8B5CF6] transition-colors"
             />
           </div>
           <div className="col-span-2">
-            <label className="block text-[10px] font-medium text-[#9CA3AF] mb-1.5">Role</label>
+            <label className="block text-[10px] font-medium text-muted-foreground mb-1.5">Role</label>
             <select 
               name="role"
               value={formData.role}
               disabled
-              className="w-full bg-[#1F2937]/30 border border-[#374151] rounded-lg px-3 py-2 text-xs text-[#9CA3AF] appearance-none cursor-not-allowed focus:outline-none"
+              className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-xs text-muted-foreground appearance-none cursor-not-allowed focus:outline-none"
             >
               <option>Head Coach</option>
               <option>Assistant Coach</option>
@@ -207,7 +207,7 @@ export function DreamyProfileSettings() {
           <button 
             onClick={handleSave}
             disabled={saving}
-            className="bg-[#8B5CF6] hover:bg-[#7C3AED] disabled:opacity-50 text-white rounded-lg px-6 py-2 text-xs font-medium transition-colors shadow-lg shadow-indigo-500/20"
+            className="bg-[#8B5CF6] hover:bg-[#7C3AED] disabled:opacity-50 text-foreground rounded-lg px-6 py-2 text-xs font-medium transition-colors shadow-lg shadow-indigo-500/20"
           >
             {saving ? "Saving..." : "Save Changes"}
           </button>

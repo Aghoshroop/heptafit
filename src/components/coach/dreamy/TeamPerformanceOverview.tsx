@@ -67,13 +67,13 @@ export function TeamPerformanceOverview() {
     };
   }, [filteredWellness]);
   return (
-    <div className="bg-[#11141A] rounded-xl p-5 border border-[#1F2937] flex flex-col h-[320px]">
+    <div className="bg-card rounded-xl p-5 border border-border flex flex-col h-[320px]">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-white">Team Performance Overview</h3>
+        <h3 className="text-sm font-semibold text-foreground">Team Performance Overview</h3>
         <div className="relative">
           <button 
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center gap-2 text-xs text-[#9CA3AF] bg-[#1F2937] hover:bg-[#374151] transition-colors px-2 py-1 rounded"
+            className="flex items-center gap-2 text-xs text-muted-foreground bg-secondary hover:bg-accent transition-colors px-2 py-1 rounded"
           >
             <span className="max-w-[100px] truncate">{selectedGroup}</span> <ChevronDown size={12} />
           </button>
@@ -81,13 +81,13 @@ export function TeamPerformanceOverview() {
           {isDropdownOpen && (
             <>
               <div className="fixed inset-0 z-10" onClick={() => setIsDropdownOpen(false)} />
-              <div className="absolute right-0 mt-1 w-40 bg-[#1F2937] border border-[#374151] rounded-lg shadow-xl z-20 py-1 max-h-48 overflow-y-auto no-scrollbar">
+              <div className="absolute right-0 mt-1 w-40 bg-secondary border border-border rounded-lg shadow-xl z-20 py-1 max-h-48 overflow-y-auto no-scrollbar">
                 <button
                   onClick={() => {
                     setSelectedGroup("All Athletes");
                     setIsDropdownOpen(false);
                   }}
-                  className={`w-full text-left px-3 py-1.5 text-xs hover:bg-[#374151] transition-colors ${selectedGroup === "All Athletes" ? "text-white bg-[#374151]/50" : "text-[#9CA3AF]"}`}
+                  className={`w-full text-left px-3 py-1.5 text-xs hover:bg-accent transition-colors ${selectedGroup === "All Athletes" ? "text-foreground bg-muted" : "text-muted-foreground"}`}
                 >
                   All Athletes
                 </button>
@@ -98,7 +98,7 @@ export function TeamPerformanceOverview() {
                       setSelectedGroup(g.name);
                       setIsDropdownOpen(false);
                     }}
-                    className={`w-full text-left px-3 py-1.5 text-xs hover:bg-[#374151] transition-colors ${selectedGroup === g.name ? "text-white bg-[#374151]/50" : "text-[#9CA3AF]"}`}
+                    className={`w-full text-left px-3 py-1.5 text-xs hover:bg-accent transition-colors ${selectedGroup === g.name ? "text-foreground bg-muted" : "text-muted-foreground"}`}
                   >
                     {g.name}
                   </button>
@@ -111,28 +111,28 @@ export function TeamPerformanceOverview() {
 
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div>
-          <p className="text-[10px] text-[#9CA3AF] uppercase tracking-wider font-bold mb-1">Avg Readiness</p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-1">Avg Readiness</p>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-white">{avgReadiness || "--"}</span>
+            <span className="text-2xl font-bold text-foreground">{avgReadiness || "--"}</span>
             <span className={`text-xs font-semibold ${trend >= 0 ? "text-[#34D399]" : "text-[#EF4444]"}`}>
               {trend > 0 ? '↑' : '↓'} {Math.abs(trend).toFixed(1)}%
             </span>
           </div>
         </div>
         <div>
-          <p className="text-[10px] text-[#9CA3AF] uppercase tracking-wider font-bold mb-1">Last Month</p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-1">Last Month</p>
           <div className="flex flex-col">
-            <span className="text-lg font-bold text-white">{lastMonthAvg || "--"}</span>
-            <span className="text-[10px] text-[#9CA3AF]">avg readiness</span>
+            <span className="text-lg font-bold text-foreground">{lastMonthAvg || "--"}</span>
+            <span className="text-[10px] text-muted-foreground">avg readiness</span>
           </div>
         </div>
         <div>
-          <p className="text-[10px] text-[#9CA3AF] uppercase tracking-wider font-bold mb-1">Trend Diff</p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-1">Trend Diff</p>
           <div className="flex flex-col">
             <span className={`text-lg font-bold ${trend >= 0 ? "text-[#34D399]" : "text-[#EF4444]"}`}>
               {trend >= 0 ? '+' : '-'}{Math.abs(avgReadiness - lastMonthAvg)} pts
             </span>
-            <span className="text-[10px] text-[#9CA3AF]">vs last month</span>
+            <span className="text-[10px] text-muted-foreground">vs last month</span>
           </div>
         </div>
       </div>
@@ -149,14 +149,14 @@ export function TeamPerformanceOverview() {
             <XAxis dataKey="name" stroke="#4B5563" fontSize={10} tickLine={false} axisLine={false} />
             <YAxis stroke="#4B5563" fontSize={10} tickLine={false} axisLine={false} domain={[0, 100]} />
             <Tooltip 
-              contentStyle={{ backgroundColor: "#1F2937", border: "1px solid #374151", borderRadius: "8px", fontSize: "12px" }}
-              itemStyle={{ color: "#E5E7EB" }}
+              contentStyle={{ backgroundColor: "var(--card)", border: "1px solid var(--border)", borderRadius: "8px", fontSize: "12px", color: "var(--foreground)" }}
+              itemStyle={{ color: "var(--foreground)" }}
             />
             <Area type="monotone" dataKey="pts" stroke="#8B5CF6" strokeWidth={2} fillOpacity={1} fill="url(#colorPts)" dot={{ fill: "#8B5CF6", r: 3 }} activeDot={{ r: 5, fill: "#8B5CF6" }} />
           </AreaChart>
         </ResponsiveContainer>
         {/* Label over last point */}
-        <div className="absolute right-6 top-8 bg-[#8B5CF6] text-white text-[10px] font-bold px-1.5 py-0.5 rounded">{avgReadiness || "--"}</div>
+        <div className="absolute right-6 top-8 bg-[#8B5CF6] text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded">{avgReadiness || "--"}</div>
       </div>
 
       <div className="mt-2 text-right">

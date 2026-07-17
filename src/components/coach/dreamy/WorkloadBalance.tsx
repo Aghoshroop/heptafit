@@ -37,15 +37,14 @@ export function WorkloadBalance() {
 
     return { acwr: acwrVal, optimalPercent: percent, message: msg, color: col };
   }, [schedules]);
-
   const data = [
     { name: "Optimal", value: optimalPercent, color },
-    { name: "Empty", value: 100 - optimalPercent, color: "#1F2937" }
+    { name: "Empty", value: 100 - optimalPercent, color: "rgba(150, 150, 150, 0.2)" }
   ];
 
   return (
-    <div className="bg-[#11141A] rounded-xl p-5 border border-[#1F2937] flex flex-col h-[150px]">
-      <h3 className="text-sm font-semibold text-white mb-2">Workload Balance</h3>
+    <div className="bg-card rounded-xl p-5 border border-border flex flex-col">
+      <h3 className="text-sm font-semibold text-foreground mb-2">Workload Balance</h3>
       
       <div className="flex-1 flex items-center justify-between">
         <div className="w-[70px] h-[70px] relative shrink-0">
@@ -69,12 +68,12 @@ export function WorkloadBalance() {
             </PieChart>
           </ResponsiveContainer>
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span className="text-[14px] font-bold text-white">{acwr.toFixed(1)}</span>
+            <span className="text-[14px] font-bold text-foreground">{acwr.toFixed(1)}</span>
           </div>
         </div>
 
         <div className="flex-1 ml-4 flex flex-col">
-          <p className="text-[11px] text-[#E5E7EB] leading-relaxed mb-2">
+          <p className="text-[11px] text-foreground leading-relaxed mb-2">
             {message}
           </p>
           <button className="text-[10px] text-[#8B5CF6] hover:text-[#7C3AED] transition-colors self-start">

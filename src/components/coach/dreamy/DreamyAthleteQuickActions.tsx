@@ -14,12 +14,12 @@ export function DreamyAthleteQuickActions() {
 
   return (
     <div>
-      <h3 className="text-sm font-semibold text-white mb-3">Quick Actions</h3>
+      <h3 className="text-sm font-semibold text-foreground mb-3">Quick Actions</h3>
       <div className="flex items-center gap-4">
         {actions.map((action, i) => (
           <button 
             key={i}
-            className="flex items-center gap-3 bg-[#11141A] border border-[#1F2937] rounded-xl px-4 py-3 hover:bg-[#1F2937]/50 transition-colors"
+            className="flex items-center gap-3 bg-card border border-border rounded-xl px-4 py-3 hover:bg-accent transition-colors"
           >
             <div className={`w-8 h-8 rounded-lg ${action.bg} flex items-center justify-center`}>
               <action.icon size={16} className={action.color} />

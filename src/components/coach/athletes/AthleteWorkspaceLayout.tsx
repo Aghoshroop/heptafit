@@ -93,7 +93,7 @@ export function AthleteWorkspaceLayout({ children }: { children: React.ReactNode
                 {athlete.photoURL || athlete.profilePhotoUrl ? (
                   <img src={athlete.photoURL || athlete.profilePhotoUrl} alt="Athlete" className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white text-3xl font-black">
+                  <div className="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-foreground text-3xl font-black">
                     {athlete.firstName?.[0] || 'A'}{athlete.lastName?.[0]}
                   </div>
                 )}

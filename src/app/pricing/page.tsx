@@ -161,7 +161,14 @@ export default function PricingPage() {
                   {tier.description}
                 </p>
 
-                <Link href={tier.price === "Custom" ? "/contact" : `/get-started?plan=${tier.name.toLowerCase()}`} className="w-full relative z-10 mb-8 block">
+                <Link 
+                  href={
+                    tier.name === "Starter" ? "/get-started?plan=starter" : 
+                    tier.price === "Custom" ? "/contact" : 
+                    `/payment?plan=${tier.name.toLowerCase()}`
+                  } 
+                  className="w-full relative z-10 mb-8 block"
+                >
                   <Button 
                     variant={tier.buttonVariant as any} 
                     className={`w-full font-bold h-12 ${tier.buttonVariant === 'outline' ? 'border-white/20 bg-white/5 hover:bg-white/10 text-white' : 'shadow-[0_0_20px_rgba(168,85,247,0.4)] hover:shadow-[0_0_30px_rgba(168,85,247,0.6)]'}`}

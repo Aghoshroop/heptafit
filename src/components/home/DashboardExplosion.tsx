@@ -5,59 +5,71 @@ import { LayoutDashboard, Smartphone, BarChart3, ActivitySquare, CalendarDays, B
 
 export function DashboardExplosion() {
   const cards = [
-    { title: "Coach Dashboard", icon: LayoutDashboard, position: "md:-translate-x-40 md:-translate-y-20", delay: 0.1 },
-    { title: "Athlete App", icon: Smartphone, position: "md:translate-x-40 md:-translate-y-16", delay: 0.2 },
-    { title: "Analytics", icon: BarChart3, position: "md:-translate-x-60 md:translate-y-10", delay: 0.3 },
-    { title: "Medical Bay", icon: ActivitySquare, position: "md:translate-x-60 md:translate-y-16", delay: 0.4 },
-    { title: "Calendar", icon: CalendarDays, position: "md:-translate-x-20 md:translate-y-32", delay: 0.5 },
-    { title: "AI Coach", icon: Brain, position: "md:translate-x-20 md:translate-y-40", delay: 0.6 },
+    { title: "Coach Dashboard", desc: "Command center for the entire academy.", icon: LayoutDashboard, color: "text-blue-400", bg: "bg-blue-400/10", border: "border-blue-400/20", delay: 0.1 },
+    { title: "Athlete App", desc: "Daily wellness & readiness tracking.", icon: Smartphone, color: "text-emerald-400", bg: "bg-emerald-400/10", border: "border-emerald-400/20", delay: 0.2 },
+    { title: "Deep Analytics", desc: "Identify trends before injuries happen.", icon: BarChart3, color: "text-purple-400", bg: "bg-purple-400/10", border: "border-purple-400/20", delay: 0.3 },
+    { title: "Medical Bay", desc: "Rehab protocols and physio notes.", icon: ActivitySquare, color: "text-rose-400", bg: "bg-rose-400/10", border: "border-rose-400/20", delay: 0.4 },
+    { title: "Smart Calendar", desc: "Periodized training macrocycles.", icon: CalendarDays, color: "text-amber-400", bg: "bg-amber-400/10", border: "border-amber-400/20", delay: 0.5 },
+    { title: "Heptafit AI", desc: "Automated risk flagging & insights.", icon: Brain, color: "text-cyan-400", bg: "bg-cyan-400/10", border: "border-cyan-400/20", delay: 0.6 },
   ];
 
   return (
-    <section className="py-40 bg-black relative border-t border-white/10 overflow-hidden">
-      {/* Background Ambient Starfield / Grid could go here, but a massive glow works best */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-[radial-gradient(circle,rgba(168,85,247,0.15)_0%,transparent_50%)] pointer-events-none " />
+    <section className="py-32 bg-black relative border-t border-white/5 overflow-hidden">
+      {/* Premium Background Glows */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-primary/20 blur-[120px] rounded-full pointer-events-none transform-gpu opacity-50" />
+      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-blue-500/10 blur-[150px] rounded-full pointer-events-none transform-gpu" />
 
-      <div className="text-center relative z-20 mb-24 px-4">
-        <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 text-white ">
-          Everything You Need. <br/><span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">Nothing You Don't.</span>
-        </h2>
-        <p className="text-xl text-white/70 max-w-2xl mx-auto ">
-          We rebuilt the sports academy software stack from the ground up, eliminating the need for 5 separate subscriptions.
-        </p>
-      </div>
-
-      <div className="relative h-[600px] max-w-5xl mx-auto flex items-center justify-center">
-        {/* Core Center Pulse */}
-        <div className="absolute w-[300px] h-[300px] rounded-full bg-primary/20  animate-pulse pointer-events-none"></div>
-        <div className="absolute w-[150px] h-[150px] rounded-full bg-blue-500/20  pointer-events-none"></div>
-        
-        <div className="absolute z-10 font-black text-3xl tracking-[0.3em] text-white  flex items-center justify-center">
-          <span className="relative z-10">HEPTAFIT OS</span>
-          <div className="absolute inset-0 bg-primary/30  animate-ping rounded-full -z-10"></div>
+      <div className="max-w-6xl mx-auto px-6 relative z-20">
+        <div className="text-center mb-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8"
+          >
+            <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+            <span className="text-sm font-semibold tracking-wider uppercase text-white/80">The Complete OS</span>
+          </motion.div>
+          
+          <h2 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 text-white">
+            Everything You Need. <br/>
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-400 to-emerald-400">
+              Nothing You Don't.
+            </span>
+          </h2>
+          <p className="text-xl text-white/60 max-w-2xl mx-auto font-light leading-relaxed">
+            We rebuilt the sports academy software stack from the ground up. Stop paying for 5 separate subscriptions that don't talk to each other.
+          </p>
         </div>
 
-        {/* Floating Modules */}
-        {cards.map((card, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, scale: 0.8, x: 0, y: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: card.delay, type: "spring", stiffness: 40 }}
-            className={`absolute z-20 ${card.position}`}
-          >
-            <motion.div 
-              animate={{ y: [-8, 8, -8] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: card.delay }}
-              className="will-change-transform bg-white/5 backdrop- border border-white/10 p-4 pr-8 rounded-2xl  flex items-center gap-4 hover:border-primary/50 hover: hover:bg-white/10 transition-all cursor-pointer group"
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {cards.map((card, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.7, delay: card.delay, type: "spring", bounce: 0.4 }}
             >
-              <div className="w-12 h-12 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center group-hover:bg-primary transition-colors shadow-inner">
-                <card.icon size={24} className="text-white " />
+              <div className="group relative h-full bg-white/[0.03] backdrop-blur-xl border border-white/10 p-8 rounded-3xl hover:bg-white/[0.06] hover:border-white/20 transition-all duration-500 cursor-pointer overflow-hidden">
+                {/* Hover Gradient Effect */}
+                <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-br ${card.bg} to-transparent transition-opacity duration-500`} />
+                
+                <div className="relative z-10">
+                  <div className={`w-14 h-14 rounded-2xl ${card.bg} ${card.border} border flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-lg`}>
+                    <card.icon size={28} className={card.color} />
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-white/70 transition-all">
+                    {card.title}
+                  </h3>
+                  <p className="text-white/60 leading-relaxed font-light">
+                    {card.desc}
+                  </p>
+                </div>
               </div>
-              <span className="font-bold text-sm whitespace-nowrap text-white ">{card.title}</span>
             </motion.div>
-          </motion.div>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   );

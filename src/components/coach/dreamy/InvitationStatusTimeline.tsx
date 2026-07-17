@@ -29,7 +29,7 @@ export function InvitationStatusTimeline({ status }: TimelineProps) {
   return (
     <div className="relative flex items-center justify-between w-full px-4">
       {/* Connecting Line */}
-      <div className="absolute left-10 right-10 top-1/2 -translate-y-1/2 h-[2px] bg-[#1F2937] z-0"></div>
+      <div className="absolute left-10 right-10 top-1/2 -translate-y-1/2 h-[2px] bg-secondary z-0"></div>
       
       {/* Active Connecting Line */}
       <div 
@@ -51,16 +51,16 @@ export function InvitationStatusTimeline({ status }: TimelineProps) {
               transition={{ delay: index * 0.1 }}
               className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors duration-300 ${
                 stepStatus === "completed" 
-                  ? "bg-[#8B5CF6] border-[#8B5CF6] text-white shadow-[0_0_15px_rgba(139,92,246,0.3)]" 
+                  ? "bg-[#8B5CF6] border-[#8B5CF6] text-foreground shadow-[0_0_15px_rgba(139,92,246,0.3)]" 
                   : stepStatus === "current"
-                    ? "bg-[#1F2937] border-[#8B5CF6] text-[#8B5CF6] shadow-[0_0_15px_rgba(139,92,246,0.15)]"
-                    : "bg-[#11141A] border-[#374151] text-[#6B7280]"
+                    ? "bg-secondary border-[#8B5CF6] text-[#8B5CF6] shadow-[0_0_15px_rgba(139,92,246,0.15)]"
+                    : "bg-card border-border text-muted-foreground"
               }`}
             >
               {stepStatus === "completed" ? <Check size={16} strokeWidth={3} /> : <Icon size={16} />}
             </motion.div>
             <span className={`text-[10px] font-bold uppercase tracking-wider ${
-              stepStatus === "completed" || stepStatus === "current" ? "text-[#E5E7EB]" : "text-[#6B7280]"
+              stepStatus === "completed" || stepStatus === "current" ? "text-foreground" : "text-muted-foreground"
             }`}>
               {step.label}
             </span>
